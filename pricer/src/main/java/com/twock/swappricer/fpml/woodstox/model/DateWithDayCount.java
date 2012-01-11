@@ -91,7 +91,7 @@ public class DateWithDayCount implements Comparable<DateWithDayCount> {
 
   @Override
   public int compareTo(DateWithDayCount o) {
-    return o.getDayCount() - getDayCount();
+    return getDayCount() - o.getDayCount();
   }
 
   @Override

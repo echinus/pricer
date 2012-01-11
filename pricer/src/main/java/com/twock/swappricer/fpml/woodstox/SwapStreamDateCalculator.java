@@ -103,35 +103,43 @@ public class SwapStreamDateCalculator {
     }
     return currentDay;
   }
-  
+
   public List<DateWithDayCount> calculateUnadjustedPeriodDates(DateWithDayCount effectiveDate, DateWithDayCount firstRegularPeriodStartDate, DateWithDayCount lastRegularPeriodEndDate, DateWithDayCount terminationDate, CalculationPeriodFrequency calculationPeriodFrequency) {
     List<DateWithDayCount> result = new ArrayList<DateWithDayCount>();
     result.add(effectiveDate);
-    
-    DateWithDayCount start = effectiveDate;
-    if (firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.compareTo(terminationDate) < 0) {
-      result.add(firstRegularPeriodStartDate);
-      start = firstRegularPeriodStartDate;
-    }
-    DateWithDayCount end = lastRegularPeriodEndDate == null ? terminationDate : lastRegularPeriodEndDate;
 
-    DateWithDayCount current = new DateWithDayCount(start);
-    while (current.compareTo(end) < 0) {
-      switch (calculationPeriodFrequency.getPeriod()) {
-        case D:
-          current.addDays(calculationPeriodFrequency.getPeriodMultiplier());
-          break;
-        case W:
-          current.addDays(7*calculationPeriodFrequency.getPeriodMultiplier());
-          break;
-        case M:
+    if(calculationPeriodFrequency.getPeriod() != PeriodEnum.T) {
+      DateWithDayCount start = effectiveDate;
+      if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.compareTo(terminationDate) < 0) {
+        result.add(firstRegularPeriodStartDate);
+        start = firstRegularPeriodStartDate;
+      }
+      DateWithDayCount end = lastRegularPeriodEndDate == null ? terminationDate : lastRegularPeriodEndDate;
 
+      DateWithDayCount current = new DateWithDayCount(start);
+      while(current.compareTo(end) < 0) {
+        switch(calculationPeriodFrequency.getPeriod()) {
+          case D:
+            current.addDays(calculationPeriodFrequency.getPeriodMultiplier());
+            break;
+          case W:
+            current.addDays(7 * calculationPeriodFrequency.getPeriodMultiplier());
+            break;
+          case M:
+            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier());
+            break;
+          case Y:
+            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12);
+            break;
+        }
+        if(current.compareTo(end) < 0) {
+          result.add(new DateWithDayCount(current));
+        }
       }
 
-    }
-
-    if (lastRegularPeriodEndDate != null && lastRegularPeriodEndDate.compareTo(effectiveDate) > 0) {
-      result.add(lastRegularPeriodEndDate);
+      if(lastRegularPeriodEndDate != null && lastRegularPeriodEndDate.compareTo(effectiveDate) > 0) {
+        result.add(lastRegularPeriodEndDate);
+      }
     }
     result.add(terminationDate);
     return result;

@@ -180,89 +180,71 @@ public class SwapStreamDateCalculatorTest {
 
   @Test
   public void singleExactPeriod() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 7, 11), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY11)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 7, 11)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 7, 11)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 7, 11), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY11)));
   }
 
   @Test
   public void singleShortPeriod() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 7, 11), new CalculationPeriodFrequency(1, PeriodEnum.Y, DAY11)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 7, 11)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 7, 11)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 7, 11), new CalculationPeriodFrequency(1, PeriodEnum.Y, DAY11)));
   }
 
   @Test
   public void shortInitialStubPeriod() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), new DateWithDayCount(2012, 1, 17), null, new DateWithDayCount(2012, 7, 17), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 1, 17),
-        new DateWithDayCount(2012, 7, 17)
-      ));
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), new DateWithDayCount(2012, 2, 1), null, new DateWithDayCount(2012, 8, 1), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 2, 1),
-        new DateWithDayCount(2012, 8, 1)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 1, 17),
+      new DateWithDayCount(2012, 7, 17)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), new DateWithDayCount(2012, 1, 17), null, new DateWithDayCount(2012, 7, 17), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 2, 1),
+      new DateWithDayCount(2012, 8, 1)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), new DateWithDayCount(2012, 2, 1), null, new DateWithDayCount(2012, 8, 1), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)));
   }
 
   @Test
   public void shortFinalStubPeriod() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, new DateWithDayCount(2012, 7, 17), new DateWithDayCount(2012, 7, 17), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 7, 17),
-        new DateWithDayCount(2012, 7, 17)
-      ));
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, new DateWithDayCount(2012, 7, 11), new DateWithDayCount(2012, 8, 1), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 7, 11),
-        new DateWithDayCount(2012, 8, 1)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 7, 11),
+      new DateWithDayCount(2012, 7, 17)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, new DateWithDayCount(2012, 7, 11), new DateWithDayCount(2012, 7, 17), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 7, 11),
+      new DateWithDayCount(2012, 8, 1)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, new DateWithDayCount(2012, 7, 11), new DateWithDayCount(2012, 8, 1), new CalculationPeriodFrequency(6, PeriodEnum.M, DAY17)));
   }
 
   @Test
   public void testNormalPeriod() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY11)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 2, 11),
-        new DateWithDayCount(2012, 3, 11),
-        new DateWithDayCount(2012, 4, 11),
-        new DateWithDayCount(2012, 5, 11),
-        new DateWithDayCount(2012, 6, 11),
-        new DateWithDayCount(2012, 7, 11),
-        new DateWithDayCount(2012, 8, 11)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 2, 11),
+      new DateWithDayCount(2012, 3, 11),
+      new DateWithDayCount(2012, 4, 11),
+      new DateWithDayCount(2012, 5, 11),
+      new DateWithDayCount(2012, 6, 11),
+      new DateWithDayCount(2012, 7, 11),
+      new DateWithDayCount(2012, 8, 11)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY11)));
   }
 
   @Test
   public void singleTerm() {
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.T, DAY11)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2012, 8, 11)
-      ));
-    Assert.assertEquals(
-      calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2014, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.T, DAY11)),
-      Arrays.asList(
-        new DateWithDayCount(2012, 1, 11),
-        new DateWithDayCount(2014, 8, 11)
-      ));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2012, 8, 11)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2012, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.T, DAY11)));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 11),
+      new DateWithDayCount(2014, 8, 11)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2014, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.T, DAY11)));
   }
 }
