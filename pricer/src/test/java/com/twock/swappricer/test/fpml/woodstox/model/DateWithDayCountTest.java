@@ -27,7 +27,7 @@ public class DateWithDayCountTest {
   @Test
   public void addMonthsEndOfMonth() {
     Assert.assertEquals(new DateWithDayCount(2012, 2, 29), new DateWithDayCount(2012, 1, 31).addMonths(1));
-    Assert.assertEquals(new DateWithDayCount(2012, 3, 31), new DateWithDayCount(2012, 2, 29).addMonths(1));
+    Assert.assertEquals(new DateWithDayCount(2012, 3, 29), new DateWithDayCount(2012, 2, 29).addMonths(1));
     Assert.assertEquals(new DateWithDayCount(2012, 4, 30), new DateWithDayCount(2012, 3, 31).addMonths(1));
   }
 
