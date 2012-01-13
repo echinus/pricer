@@ -1,32 +1,34 @@
 package com.twock.swappricer.test.fpml.woodstox;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.TreeMap;
+import java.util.*;
 
 import com.twock.swappricer.HolidayCalendar;
 import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.PricerException;
+import com.twock.swappricer.fpml.woodstox.FpmlParser;
 import com.twock.swappricer.fpml.woodstox.SwapStreamDateCalculator;
 import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
 import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
-import com.twock.swappricer.fpml.woodstox.model.PeriodEnum;
+import com.twock.swappricer.fpml.woodstox.model.SwapStream;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.PeriodEnum;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static com.twock.swappricer.fpml.woodstox.model.BusinessDayConventionEnum.*;
-import static com.twock.swappricer.fpml.woodstox.model.RollConventionEnum.*;
+import static com.twock.swappricer.fpml.woodstox.model.enumeration.BusinessDayConventionEnum.*;
+import static com.twock.swappricer.fpml.woodstox.model.enumeration.RollConventionEnum.*;
 
 /**
  * @author Chris Pearson (chris@twock.com)
  */
 public class SwapStreamDateCalculatorTest {
-  private SwapStreamDateCalculator calculator;
+  private static SwapStreamDateCalculator calculator;
+  private static FpmlParser fpmlParser;
 
-  @Before
-  public void setUp() {
+  @BeforeClass
+  public static void setUp() {
     calculator = new SwapStreamDateCalculator();
+    fpmlParser = FpmlParserTest.createFpmlParser();
   }
 
   @Test
@@ -246,5 +248,48 @@ public class SwapStreamDateCalculatorTest {
       new DateWithDayCount(2012, 1, 11),
       new DateWithDayCount(2014, 8, 11)
     ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 11), null, null, new DateWithDayCount(2014, 8, 11), new CalculationPeriodFrequency(1, PeriodEnum.T, DAY11)));
+  }
+
+  @Test
+  public void calculateFpmlPeriodDates() {
+    List<SwapStream> streams = fpmlParser.parse(getClass().getResourceAsStream("/LCH00000513426.xml"));
+    SwapStream s1 = streams.get(0);
+    SwapStream s2 = streams.get(1);
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2008, 6, 13),
+      new DateWithDayCount(2009, 6, 13),
+      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2011, 6, 13),
+      new DateWithDayCount(2012, 6, 13),
+      new DateWithDayCount(2013, 6, 13),
+      new DateWithDayCount(2014, 6, 13),
+      new DateWithDayCount(2015, 6, 13),
+      new DateWithDayCount(2016, 6, 13),
+      new DateWithDayCount(2017, 6, 13),
+      new DateWithDayCount(2018, 6, 13)
+    ), calculator.calculateUnadjustedPeriodDates(s1.getEffectiveDate().getUnadjustedDate(), s1.getFirstRegularPeriodStartDate(), s1.getLastRegularPeriodEndDate(), s1.getTerminationDate().getUnadjustedDate(), s1.getCalculationPeriodFrequency()));
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2008, 6, 13),
+      new DateWithDayCount(2008, 12, 13),
+      new DateWithDayCount(2009, 6, 13),
+      new DateWithDayCount(2009, 12, 13),
+      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2010, 12, 13),
+      new DateWithDayCount(2011, 6, 13),
+      new DateWithDayCount(2011, 12, 13),
+      new DateWithDayCount(2012, 6, 13),
+      new DateWithDayCount(2012, 12, 13),
+      new DateWithDayCount(2013, 6, 13),
+      new DateWithDayCount(2013, 12, 13),
+      new DateWithDayCount(2014, 6, 13),
+      new DateWithDayCount(2014, 12, 13),
+      new DateWithDayCount(2015, 6, 13),
+      new DateWithDayCount(2015, 12, 13),
+      new DateWithDayCount(2016, 6, 13),
+      new DateWithDayCount(2016, 12, 13),
+      new DateWithDayCount(2017, 6, 13),
+      new DateWithDayCount(2017, 12, 13),
+      new DateWithDayCount(2018, 6, 13)
+    ), calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency()));
   }
 }

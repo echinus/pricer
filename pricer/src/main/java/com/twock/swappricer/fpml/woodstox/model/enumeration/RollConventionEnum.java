@@ -1,4 +1,4 @@
-package com.twock.swappricer.fpml.woodstox.model;
+package com.twock.swappricer.fpml.woodstox.model.enumeration;
 
 /**
  * <a href="http://www.fpml.org/spec/fpml-5-2-5-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-shared-5-2_xsd/complexTypes/CalculationPeriodFrequency/rollConvention.html">http://www.fpml.org/spec/fpml-5-2-5-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-shared-5-2_xsd/complexTypes/CalculationPeriodFrequency/rollConvention.html</a>

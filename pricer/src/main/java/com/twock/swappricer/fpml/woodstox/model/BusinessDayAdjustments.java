@@ -2,6 +2,8 @@ package com.twock.swappricer.fpml.woodstox.model;
 
 import java.util.Arrays;
 
+import com.twock.swappricer.fpml.woodstox.model.enumeration.BusinessDayConventionEnum;
+
 /**
  * @author Chris Pearson (chris@twock.com)
  */

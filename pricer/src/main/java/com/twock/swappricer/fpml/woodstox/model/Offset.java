@@ -1,20 +1,20 @@
 package com.twock.swappricer.fpml.woodstox.model;
 
+import com.twock.swappricer.fpml.woodstox.model.enumeration.DayTypeEnum;
 import com.twock.swappricer.fpml.woodstox.model.enumeration.PeriodEnum;
-import com.twock.swappricer.fpml.woodstox.model.enumeration.RollConventionEnum;
 
 /**
  * @author Chris Pearson (chris@twock.com)
  */
-public class CalculationPeriodFrequency {
+public class Offset {
   private final Integer periodMultiplier;
   private final PeriodEnum period;
-  private final RollConventionEnum rollConvention;
+  private final DayTypeEnum dayType;
 
-  public CalculationPeriodFrequency(Integer periodMultiplier, PeriodEnum period, RollConventionEnum rollConvention) {
+  public Offset(Integer periodMultiplier, PeriodEnum period, DayTypeEnum dayType) {
     this.periodMultiplier = periodMultiplier;
     this.period = period;
-    this.rollConvention = rollConvention;
+    this.dayType = dayType;
   }
 
   public Integer getPeriodMultiplier() {
@@ -25,16 +25,16 @@ public class CalculationPeriodFrequency {
     return period;
   }
 
-  public RollConventionEnum getRollConvention() {
-    return rollConvention;
+  public DayTypeEnum getDayType() {
+    return dayType;
   }
 
   @Override
   public String toString() {
-    return "CalculationPeriodFrequency{" +
+    return "Offset{" +
       "periodMultiplier=" + periodMultiplier +
       ", period=" + period +
-      ", rollConvention=" + rollConvention +
+      ", dayType=" + dayType +
       '}';
   }
 }

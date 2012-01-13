@@ -3,6 +3,8 @@ package com.twock.swappricer.fpml.woodstox;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -34,7 +36,7 @@ public class FpmlParser {
     this.xmlInputFactory = xmlInputFactory;
   }
 
-  public void parse(InputStream inputStream) {
+  public List<SwapStream> parse(InputStream inputStream) {
     XMLStreamReader2 streamReader = null;
     try {
       try {
@@ -42,7 +44,7 @@ public class FpmlParser {
       } catch(Exception e) {
         throw new PricerException("Failed to create reader to parse XML document", e);
       }
-      parseFpml(streamReader);
+      return parseFpml(streamReader);
     } catch(XMLStreamException e) {
       throw new PricerException("Error parsing XML document", e);
     } finally {
@@ -56,16 +58,18 @@ public class FpmlParser {
     }
   }
 
-  private void parseFpml(XMLStreamReader2 streamReader) throws XMLStreamException {
+  private List<SwapStream> parseFpml(XMLStreamReader2 streamReader) throws XMLStreamException {
+    List<SwapStream> swapStreams = new ArrayList<SwapStream>();
     while(streamReader.hasNext()) {
       switch(streamReader.next()) {
         case XMLEvent.START_ELEMENT:
           if("swapStream".equals(streamReader.getLocalName())) {
             SwapStream swapStream = swapStreamFactory.readSwapStream(streamReader);
-            log.info("Read " + swapStream);
+            swapStreams.add(swapStream);
           }
       }
     }
+    return swapStreams;
   }
 
   public static DateWithDayCount readTextDate(XMLStreamReader2 streamReader) throws XMLStreamException {

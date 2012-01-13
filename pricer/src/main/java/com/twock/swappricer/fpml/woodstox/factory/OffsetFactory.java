@@ -5,19 +5,19 @@ import javax.xml.stream.events.XMLEvent;
 
 import com.twock.swappricer.PricerException;
 import com.twock.swappricer.fpml.woodstox.FpmlParser;
-import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
+import com.twock.swappricer.fpml.woodstox.model.Offset;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.DayTypeEnum;
 import com.twock.swappricer.fpml.woodstox.model.enumeration.PeriodEnum;
-import com.twock.swappricer.fpml.woodstox.model.enumeration.RollConventionEnum;
 import org.codehaus.stax2.XMLStreamReader2;
 
 /**
  * @author Chris Pearson (chris@twock.com)
  */
-public class CalculationPeriodFrequencyFactory {
-  public CalculationPeriodFrequency readCalculationPeriodFrequency(XMLStreamReader2 streamReader) throws XMLStreamException {
+public class OffsetFactory {
+  public Offset readOffset(XMLStreamReader2 streamReader) throws XMLStreamException {
     Integer periodMultiplier = null;
     PeriodEnum period = null;
-    RollConventionEnum rollConvention = null;
+    DayTypeEnum dayType = null;
     int startingDepth = streamReader.getDepth();
     while(streamReader.hasNext()) {
       switch(streamReader.next()) {
@@ -26,22 +26,19 @@ public class CalculationPeriodFrequencyFactory {
             String localName = streamReader.getLocalName();
             if("periodMultiplier".equals(localName)) {
               periodMultiplier = Integer.parseInt(FpmlParser.readText(streamReader));
-            }
-            if("period".equals(localName)) {
+            } else if("period".equals(localName)) {
               period = PeriodEnum.valueOf(FpmlParser.readText(streamReader));
-            }
-            if("rollConvention".equals(localName)) {
-              rollConvention = RollConventionEnum.fromValue(FpmlParser.readText(streamReader));
+            } else if("dayType".equals(localName)) {
+              dayType = DayTypeEnum.fromValue(FpmlParser.readText(streamReader));
             }
           }
           break;
         case XMLEvent.END_ELEMENT:
           if(streamReader.getDepth() == startingDepth) {
-            return new CalculationPeriodFrequency(periodMultiplier, period, rollConvention);
+            return new Offset(periodMultiplier, period, dayType);
           }
       }
     }
     throw new PricerException("No more events before element finished");
   }
-
 }

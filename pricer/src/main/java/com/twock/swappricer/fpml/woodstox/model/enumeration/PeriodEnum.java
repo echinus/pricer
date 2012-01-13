@@ -1,4 +1,4 @@
-package com.twock.swappricer.fpml.woodstox.model;
+package com.twock.swappricer.fpml.woodstox.model.enumeration;
 
 /**
  * @author Chris Pearson (chris@twock.com)

@@ -8,6 +8,7 @@ import com.twock.swappricer.DateUtil;
 import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.PricerException;
 import com.twock.swappricer.fpml.woodstox.model.*;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.*;
 
 /**
  * @author Chris Pearson (chris@twock.com)
@@ -143,5 +144,17 @@ public class SwapStreamDateCalculator {
     }
     result.add(terminationDate);
     return result;
+  }
+
+  public DateWithDayCount shift(DateWithDayCount date, int periodMultiplier, PeriodEnum period, DayTypeEnum dayType) {
+    if(period != PeriodEnum.D) {
+      throw new PricerException("Unhandled period " + period + ", expected D");
+    }
+    switch(dayType) {
+      case BUSINESS:
+      case CALENDAR:
+      default:
+        throw new PricerException("Unhandled dayType " + dayType + ", expected BUSINESS or CALENDAR");
+    }
   }
 }

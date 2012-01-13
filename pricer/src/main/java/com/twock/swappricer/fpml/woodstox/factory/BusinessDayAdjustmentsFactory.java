@@ -8,7 +8,7 @@ import javax.xml.stream.events.XMLEvent;
 import com.twock.swappricer.PricerException;
 import com.twock.swappricer.fpml.woodstox.FpmlParser;
 import com.twock.swappricer.fpml.woodstox.model.BusinessDayAdjustments;
-import com.twock.swappricer.fpml.woodstox.model.BusinessDayConventionEnum;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.BusinessDayConventionEnum;
 import org.codehaus.stax2.XMLStreamReader2;
 
 /**
@@ -22,17 +22,15 @@ public class BusinessDayAdjustmentsFactory {
     while(streamReader.hasNext()) {
       switch(streamReader.next()) {
         case XMLEvent.START_ELEMENT:
-          if(streamReader.getDepth() == startingDepth + 1) {
-            String localName = streamReader.getLocalName();
-            if("businessDayConvention".equals(localName)) {
-              businessDayConvention = BusinessDayConventionEnum.fromValue(FpmlParser.readText(streamReader));
+          String localName = streamReader.getLocalName();
+          if("businessDayConvention".equals(localName)) {
+            businessDayConvention = BusinessDayConventionEnum.fromValue(FpmlParser.readText(streamReader));
+          }
+          if("businessCenter".equals(localName)) {
+            if(businessCenters == null) {
+              businessCenters = new ArrayList<String>();
             }
-            if("businessCenter".equals(localName)) {
-              if(businessCenters == null) {
-                businessCenters = new ArrayList<String>();
-              }
-              businessCenters.add(FpmlParser.readText(streamReader));
-            }
+            businessCenters.add(FpmlParser.readText(streamReader));
           }
           break;
         case XMLEvent.END_ELEMENT:
