@@ -13,6 +13,17 @@ import org.apache.commons.io.IOUtils;
 public class HolidayCalendarContainer {
   public Map<String, HolidayCalendar> holidayCalendars;
 
+  public HolidayCalendarContainer() {
+  }
+
+  public HolidayCalendarContainer(HolidayCalendarContainer cals, Collection<String> codes) {
+    TreeMap<String, HolidayCalendar> calendars = new TreeMap<String, HolidayCalendar>();
+    for(String code : codes) {
+      calendars.put(code, cals.getHolidayCalendars().get(code));
+    }
+    holidayCalendars = calendars;
+  }
+
   public void loadFromTsv(Reader input) {
     Map<String, HolidayCalendar> result = new TreeMap<String, HolidayCalendar>();
     try {

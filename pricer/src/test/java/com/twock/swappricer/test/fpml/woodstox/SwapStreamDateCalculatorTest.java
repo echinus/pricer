@@ -1,5 +1,7 @@
 package com.twock.swappricer.test.fpml.woodstox;
 
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import com.twock.swappricer.HolidayCalendar;
@@ -10,6 +12,8 @@ import com.twock.swappricer.fpml.woodstox.SwapStreamDateCalculator;
 import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
 import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
 import com.twock.swappricer.fpml.woodstox.model.SwapStream;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.BusinessDayConventionEnum;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.DayTypeEnum;
 import com.twock.swappricer.fpml.woodstox.model.enumeration.PeriodEnum;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -24,11 +28,16 @@ import static com.twock.swappricer.fpml.woodstox.model.enumeration.RollConventio
 public class SwapStreamDateCalculatorTest {
   private static SwapStreamDateCalculator calculator;
   private static FpmlParser fpmlParser;
+  private static HolidayCalendarContainer container;
+  private static HolidayCalendarContainer london;
 
   @BeforeClass
-  public static void setUp() {
+  public static void setUp() throws UnsupportedEncodingException {
     calculator = new SwapStreamDateCalculator();
     fpmlParser = FpmlParserTest.createFpmlParser();
+    container = new HolidayCalendarContainer();
+    container.loadFromTsv(new InputStreamReader(SwapStreamDateCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
+    london = new HolidayCalendarContainer(container, Arrays.asList("GBLO"));
   }
 
   @Test
@@ -291,5 +300,37 @@ public class SwapStreamDateCalculatorTest {
       new DateWithDayCount(2017, 12, 13),
       new DateWithDayCount(2018, 6, 13)
     ), calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency()));
+  }
+
+  @Test
+  public void shiftNoBusinessDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODPRECEDING, london));
+  }
+
+  @Test
+  public void shiftNoCalendarDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODPRECEDING, london));
+  }
+
+  @Test
+  public void shiftPositiveBusinessDay() {
+  }
+
+  @Test
+  public void shiftPositiveCalendarDay() {
+  }
+
+  @Test
+  public void shiftNegativeBusinessDay() {
+  }
+
+  @Test
+  public void shiftNegativeCalendarDay() {
   }
 }

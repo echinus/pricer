@@ -7,7 +7,9 @@ import java.util.List;
 import com.twock.swappricer.DateUtil;
 import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.PricerException;
-import com.twock.swappricer.fpml.woodstox.model.*;
+import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
+import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
+import com.twock.swappricer.fpml.woodstox.model.SwapStream;
 import com.twock.swappricer.fpml.woodstox.model.enumeration.*;
 
 /**
@@ -64,6 +66,14 @@ public class SwapStreamDateCalculator {
     }
   }
 
+  /**
+   * Adjust the given date according to the business day convention and calendars provided.
+   *
+   * @param startDate date to adjust - this date will be altered
+   * @param businessDayConvention business day convention to apply
+   * @param calendars holiday calendars in use, can be null
+   * @return startDate, for convenience/method chaining
+   */
   public DateWithDayCount adjustDate(DateWithDayCount startDate, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer calendars) {
     if(businessDayConvention == BusinessDayConventionEnum.NO_ADJUST) {
       return startDate;
@@ -146,15 +156,26 @@ public class SwapStreamDateCalculator {
     return result;
   }
 
-  public DateWithDayCount shift(DateWithDayCount date, int periodMultiplier, PeriodEnum period, DayTypeEnum dayType) {
+  public DateWithDayCount shift(DateWithDayCount date, int periodMultiplier, PeriodEnum period, DayTypeEnum dayType, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer holidayCalendarContainer) {
     if(period != PeriodEnum.D) {
       throw new PricerException("Unhandled period " + period + ", expected D");
     }
     switch(dayType) {
       case BUSINESS:
+        int signum = Integer.signum(periodMultiplier);
+        int abs = Math.abs(periodMultiplier);
+        for (int i = 0; i < abs; i++) {
+          date.addDays(signum);
+          adjustDate(date, signum == -1 ? BusinessDayConventionEnum.PRECEDING : BusinessDayConventionEnum.FOLLOWING, holidayCalendarContainer);
+        }
+        break;
       case CALENDAR:
+        date.addDays(periodMultiplier);
+        adjustDate(date, businessDayConvention, holidayCalendarContainer);
+        break;
       default:
         throw new PricerException("Unhandled dayType " + dayType + ", expected BUSINESS or CALENDAR");
     }
+    return date;
   }
 }
