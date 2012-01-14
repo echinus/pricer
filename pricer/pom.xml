@@ -9,14 +9,10 @@
   </parent>
   <groupId>com.twock.swappricer</groupId>
   <artifactId>pricer</artifactId>
+  <name>Swap Pricer Core</name>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <dependencies>
-    <dependency>
-      <groupId>com.twock.swappricer</groupId>
-      <artifactId>jaxb-fpml</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -42,11 +38,6 @@
       <groupId>org.codehaus.woodstox</groupId>
       <artifactId>woodstox-core-asl</artifactId>
       <version>4.1.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
-      <version>2.2.4-1</version>
     </dependency>
   </dependencies>
 </project>
