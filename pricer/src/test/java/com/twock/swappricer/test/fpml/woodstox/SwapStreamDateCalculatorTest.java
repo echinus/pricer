@@ -206,6 +206,42 @@ public class SwapStreamDateCalculatorTest {
   }
 
   @Test
+  public void imm3mDates() {
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 18),
+      new DateWithDayCount(2012, 4, 18),
+      new DateWithDayCount(2012, 7, 18),
+      new DateWithDayCount(2012, 10, 17),
+      new DateWithDayCount(2013, 1, 16)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 18), null, null, new DateWithDayCount(2013, 1, 16), new CalculationPeriodFrequency(3, PeriodEnum.M, IMM)));
+  }
+
+  @Test
+  public void imm1mDates() {
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2012, 1, 18),
+      new DateWithDayCount(2012, 2, 15),
+      new DateWithDayCount(2012, 3, 21),
+      new DateWithDayCount(2012, 4, 18),
+      new DateWithDayCount(2012, 5, 16),
+      new DateWithDayCount(2012, 6, 20),
+      new DateWithDayCount(2012, 7, 18)
+    ), calculator.calculateUnadjustedPeriodDates(new DateWithDayCount(2012, 1, 18), null, null, new DateWithDayCount(2012, 7, 18), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM)));
+  }
+
+  @Test
+  public void immStubsGiven() {
+    DateWithDayCount JAN18 = new DateWithDayCount(2012, 1, 18);
+    DateWithDayCount FEB15 = new DateWithDayCount(2012, 2, 15);
+    DateWithDayCount JUN20 = new DateWithDayCount(2012, 6, 20);
+    DateWithDayCount JUL18 = new DateWithDayCount(2012, 7, 18);
+    List<DateWithDayCount> expected = Arrays.asList(JAN18, FEB15, new DateWithDayCount(2012, 3, 21), new DateWithDayCount(2012, 4, 18), new DateWithDayCount(2012, 5, 16), JUN20, JUL18);
+    Assert.assertEquals(expected, calculator.calculateUnadjustedPeriodDates(JAN18, FEB15, null, JUL18, new CalculationPeriodFrequency(1, PeriodEnum.M, IMM)));
+    Assert.assertEquals(expected, calculator.calculateUnadjustedPeriodDates(JAN18, FEB15, JUN20, JUL18, new CalculationPeriodFrequency(1, PeriodEnum.M, IMM)));
+    Assert.assertEquals(expected, calculator.calculateUnadjustedPeriodDates(JAN18, null, JUN20, JUL18, new CalculationPeriodFrequency(1, PeriodEnum.M, IMM)));
+  }
+
+  @Test
   public void shortInitialStubPeriod() {
     Assert.assertEquals(Arrays.asList(
       new DateWithDayCount(2012, 1, 11),

@@ -1,5 +1,9 @@
 package com.twock.swappricer.fpml.woodstox.model.enumeration;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 /**
  * <a href="http://www.fpml.org/spec/fpml-5-2-5-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-shared-5-2_xsd/complexTypes/CalculationPeriodFrequency/rollConvention.html">http://www.fpml.org/spec/fpml-5-2-5-rec-1/html/confirmation/schemaDocumentation/schemas/fpml-shared-5-2_xsd/complexTypes/CalculationPeriodFrequency/rollConvention.html</a>
  *
@@ -53,6 +57,7 @@ public enum RollConventionEnum {
   SAT("SAT"),
   SUN("SUN");
   private final String value;
+  public static final Set<RollConventionEnum> DAY_ROLLS = Collections.unmodifiableSet(EnumSet.range(DAY1, DAY30));
 
   RollConventionEnum(String v) {
     value = v;

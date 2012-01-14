@@ -138,10 +138,10 @@ public class SwapStreamDateCalculator {
             current.addDays(7 * calculationPeriodFrequency.getPeriodMultiplier());
             break;
           case M:
-            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier());
+            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
             break;
           case Y:
-            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12);
+            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12, calculationPeriodFrequency.getRollConvention());
             break;
         }
         if(current.compareTo(end) < 0) {
