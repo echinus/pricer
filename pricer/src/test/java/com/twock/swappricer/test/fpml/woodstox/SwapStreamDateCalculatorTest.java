@@ -28,16 +28,16 @@ import static com.twock.swappricer.fpml.woodstox.model.enumeration.RollConventio
 public class SwapStreamDateCalculatorTest {
   private static SwapStreamDateCalculator calculator;
   private static FpmlParser fpmlParser;
-  private static HolidayCalendarContainer container;
+  private static HolidayCalendarContainer allCalendars;
   private static HolidayCalendarContainer london;
 
   @BeforeClass
   public static void setUp() throws UnsupportedEncodingException {
     calculator = new SwapStreamDateCalculator();
     fpmlParser = FpmlParserTest.createFpmlParser();
-    container = new HolidayCalendarContainer();
-    container.loadFromTsv(new InputStreamReader(SwapStreamDateCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
-    london = new HolidayCalendarContainer(container, "GBLO");
+    allCalendars = new HolidayCalendarContainer();
+    allCalendars.loadFromTsv(new InputStreamReader(SwapStreamDateCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
+    london = new HolidayCalendarContainer(allCalendars, "GBLO");
   }
 
   @Test
@@ -309,25 +309,31 @@ public class SwapStreamDateCalculatorTest {
     SwapStream s2 = streams.get(1);
     List<DateWithDayCount> unadjustedSide1Dates = calculator.calculateUnadjustedPeriodDates(s1.getEffectiveDate().getUnadjustedDate(), s1.getFirstRegularPeriodStartDate(), s1.getLastRegularPeriodEndDate(), s1.getTerminationDate().getUnadjustedDate(), s1.getCalculationPeriodFrequency());
     List<DateWithDayCount> unadjustedSide2Dates = calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency());
+    List<DateWithDayCount> adjustedSide1Dates = calculator.calculateAdjustedPeriodDates(unadjustedSide1Dates, s1.getEffectiveDate().getBusinessDayAdjustments(), s1.getCalculationPeriodDatesAdjustments(), s1.getTerminationDate().getBusinessDayAdjustments(), allCalendars);
+    List<DateWithDayCount> adjustedSide2Dates = calculator.calculateAdjustedPeriodDates(unadjustedSide2Dates, s2.getEffectiveDate().getBusinessDayAdjustments(), s2.getCalculationPeriodDatesAdjustments(), s2.getTerminationDate().getBusinessDayAdjustments(), allCalendars);
     Assert.assertEquals(Arrays.asList(
       new DateWithDayCount(2008, 6, 13),
-      new DateWithDayCount(2009, 6, 13),
-      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2009, 6, 15),
+      new DateWithDayCount(2010, 6, 14),
       new DateWithDayCount(2011, 6, 13),
       new DateWithDayCount(2012, 6, 13),
       new DateWithDayCount(2013, 6, 13),
       new DateWithDayCount(2014, 6, 13),
-      new DateWithDayCount(2015, 6, 13),
+      new DateWithDayCount(2015, 6, 15),
       new DateWithDayCount(2016, 6, 13),
       new DateWithDayCount(2017, 6, 13),
       new DateWithDayCount(2018, 6, 13)
-    ), unadjustedSide1Dates);
+    ), adjustedSide1Dates);
+    Assert.assertTrue(unadjustedSide1Dates.get(0) == adjustedSide1Dates.get(0));
+    Assert.assertTrue(unadjustedSide1Dates.get(3) == adjustedSide1Dates.get(3));
+    Assert.assertTrue(unadjustedSide1Dates.get(4) == adjustedSide1Dates.get(4));
+    Assert.assertTrue(unadjustedSide1Dates.get(10) == adjustedSide1Dates.get(10));
     Assert.assertEquals(Arrays.asList(
       new DateWithDayCount(2008, 6, 13),
-      new DateWithDayCount(2008, 12, 13),
-      new DateWithDayCount(2009, 6, 13),
-      new DateWithDayCount(2009, 12, 13),
-      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2008, 12, 15),
+      new DateWithDayCount(2009, 6, 15),
+      new DateWithDayCount(2009, 12, 14),
+      new DateWithDayCount(2010, 6, 14),
       new DateWithDayCount(2010, 12, 13),
       new DateWithDayCount(2011, 6, 13),
       new DateWithDayCount(2011, 12, 13),
@@ -336,15 +342,15 @@ public class SwapStreamDateCalculatorTest {
       new DateWithDayCount(2013, 6, 13),
       new DateWithDayCount(2013, 12, 13),
       new DateWithDayCount(2014, 6, 13),
-      new DateWithDayCount(2014, 12, 13),
-      new DateWithDayCount(2015, 6, 13),
-      new DateWithDayCount(2015, 12, 13),
+      new DateWithDayCount(2014, 12, 15),
+      new DateWithDayCount(2015, 6, 15),
+      new DateWithDayCount(2015, 12, 14),
       new DateWithDayCount(2016, 6, 13),
       new DateWithDayCount(2016, 12, 13),
       new DateWithDayCount(2017, 6, 13),
       new DateWithDayCount(2017, 12, 13),
       new DateWithDayCount(2018, 6, 13)
-    ), unadjustedSide2Dates);
+    ), adjustedSide2Dates);
   }
 
   @Test

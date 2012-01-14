@@ -170,7 +170,7 @@ public class SwapStreamDateCalculator {
     };
     List<DateWithDayCount> adjustedDates = new ArrayList<DateWithDayCount>(unadjustedDates.size());
     DateWithDayCount temp = new DateWithDayCount(0);
-    for(int index = 0, last = adjustedDates.size() - 1; index <= last; index++) {
+    for(int index = 0, last = unadjustedDates.size() - 1; index <= last; index++) {
       int pos = index == 0 ? 0 : (index == last ? 2 : 1);
       DateWithDayCount toAdjust = unadjustedDates.get(index);
       temp.setDayCount(toAdjust.getDayCount());

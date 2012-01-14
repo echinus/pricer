@@ -17,7 +17,7 @@ public class HolidayCalendarContainer {
   }
 
   public HolidayCalendarContainer(HolidayCalendarContainer cals, String... codes) {
-    if(cals.holidayCalendars != null) {
+    if(cals.holidayCalendars != null && codes != null) {
       TreeMap<String, HolidayCalendar> calendars = new TreeMap<String, HolidayCalendar>();
       for(String code : codes) {
         HolidayCalendar calendar = cals.getHolidayCalendars().get(code);

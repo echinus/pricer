@@ -11,7 +11,7 @@ public class BusinessDayAdjustments {
   private final BusinessDayConventionEnum businessDayConvention;
   private final String[] businessCenters;
 
-  public BusinessDayAdjustments(BusinessDayConventionEnum businessDayConvention, String[] businessCenters) {
+  public BusinessDayAdjustments(BusinessDayConventionEnum businessDayConvention, String... businessCenters) {
     this.businessDayConvention = businessDayConvention;
     this.businessCenters = businessCenters;
   }
