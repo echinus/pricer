@@ -1,11 +1,7 @@
 package com.twock.swappricer;
 
-import java.util.Calendar;
-
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
-
 /**
- * @author Chris Pearson (chris@twock.com)
+ * Taken from <a href="http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html">http://alcor.concordia.ca/~gpkatch/gdate-algorithm.html</a>.
  */
 public class DateUtil {
   /**
