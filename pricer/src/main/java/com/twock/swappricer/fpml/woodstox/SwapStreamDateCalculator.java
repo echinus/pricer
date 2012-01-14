@@ -7,9 +7,7 @@ import java.util.List;
 import com.twock.swappricer.DateUtil;
 import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.PricerException;
-import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
-import com.twock.swappricer.fpml.woodstox.model.SwapStream;
+import com.twock.swappricer.fpml.woodstox.model.*;
 import com.twock.swappricer.fpml.woodstox.model.enumeration.*;
 
 /**
@@ -69,50 +67,53 @@ public class SwapStreamDateCalculator {
   /**
    * Adjust the given date according to the business day convention and calendars provided.
    *
-   * @param startDate date to adjust - this date will be altered
+   * @param date date to adjust - this date will be altered
    * @param businessDayConvention business day convention to apply
    * @param calendars holiday calendars in use, can be null
    * @return startDate, for convenience/method chaining
    */
-  public DateWithDayCount adjustDate(DateWithDayCount startDate, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer calendars) {
+  public DateWithDayCount adjustDate(DateWithDayCount date, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer calendars) {
     if(businessDayConvention == BusinessDayConventionEnum.NO_ADJUST) {
-      return startDate;
+      return date;
     }
-    DateWithDayCount currentDay = new DateWithDayCount(startDate);
-    while(calendars.isWeekendOrPublicHoliday(currentDay)) {
-      int dayOfWeek = currentDay.getDayOfWeek();
+    short startMonth = businessDayConvention == BusinessDayConventionEnum.MODFOLLOWING || businessDayConvention == BusinessDayConventionEnum.MODPRECEDING ? date.getMonthOfYear() : 0;
+    int startDate = date.getDayCount();
+    while(calendars.isWeekendOrPublicHoliday(date)) {
+      int dayOfWeek = date.getDayOfWeek();
       switch(businessDayConvention) {
         case FOLLOWING:
-          currentDay.addDays(dayOfWeek == Calendar.SATURDAY ? 2 : 1);
+          date.addDays(dayOfWeek == Calendar.SATURDAY ? 2 : 1);
           break;
         case MODFOLLOWING:
-          currentDay.addDays(1);
-          if(currentDay.getMonthOfYear() != startDate.getMonthOfYear()) {
+          date.addDays(1);
+          if(date.getMonthOfYear() != startMonth) {
             // if we've strayed to the next month, rewind to the starting date, and go backwards instead
-            return adjustDate(startDate, BusinessDayConventionEnum.PRECEDING, calendars);
+            date.setDayCount(startDate);
+            return adjustDate(date, BusinessDayConventionEnum.PRECEDING, calendars);
           }
           break;
         case PRECEDING:
-          currentDay.addDays(dayOfWeek == Calendar.SUNDAY ? -2 : -1);
+          date.addDays(dayOfWeek == Calendar.SUNDAY ? -2 : -1);
           break;
         case MODPRECEDING:
-          currentDay.addDays(-1);
-          if(currentDay.getMonthOfYear() != startDate.getMonthOfYear()) {
+          date.addDays(-1);
+          if(date.getMonthOfYear() != startMonth) {
             // if we've strayed to the previous month, fast forward to the starting date, and go forwards instead
-            return adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, calendars);
+            date.setDayCount(startDate);
+            return adjustDate(date, BusinessDayConventionEnum.FOLLOWING, calendars);
           }
           break;
         case NEAREST:
           if(dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.MONDAY) {
-            return adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, calendars);
+            return adjustDate(date, BusinessDayConventionEnum.FOLLOWING, calendars);
           } else {
-            return adjustDate(startDate, BusinessDayConventionEnum.PRECEDING, calendars);
+            return adjustDate(date, BusinessDayConventionEnum.PRECEDING, calendars);
           }
         default:
           throw new PricerException("Unhandled business day convention " + businessDayConvention);
       }
     }
-    return currentDay;
+    return date;
   }
 
   public List<DateWithDayCount> calculateUnadjustedPeriodDates(DateWithDayCount effectiveDate, DateWithDayCount firstRegularPeriodStartDate, DateWithDayCount lastRegularPeriodEndDate, DateWithDayCount terminationDate, CalculationPeriodFrequency calculationPeriodFrequency) {
@@ -156,6 +157,34 @@ public class SwapStreamDateCalculator {
     return result;
   }
 
+  public List<DateWithDayCount> calculateAdjustedPeriodDates(List<DateWithDayCount> unadjustedDates, BusinessDayAdjustments effectiveDateAdjustments, BusinessDayAdjustments normalAdjustments, BusinessDayAdjustments terminationDateAdjustments, HolidayCalendarContainer allCalendars) {
+    BusinessDayConventionEnum businessDayConventions[] = {
+      effectiveDateAdjustments.getBusinessDayConvention(),
+      normalAdjustments.getBusinessDayConvention(),
+      terminationDateAdjustments.getBusinessDayConvention()
+    };
+    HolidayCalendarContainer[] calendars = {
+      new HolidayCalendarContainer(allCalendars, effectiveDateAdjustments.getBusinessCenters()),
+      new HolidayCalendarContainer(allCalendars, normalAdjustments.getBusinessCenters()),
+      new HolidayCalendarContainer(allCalendars, terminationDateAdjustments.getBusinessCenters())
+    };
+    List<DateWithDayCount> adjustedDates = new ArrayList<DateWithDayCount>(unadjustedDates.size());
+    DateWithDayCount temp = new DateWithDayCount(0);
+    for(int index = 0, last = adjustedDates.size() - 1; index <= last; index++) {
+      int pos = index == 0 ? 0 : (index == last ? 2 : 1);
+      DateWithDayCount toAdjust = unadjustedDates.get(index);
+      temp.setDayCount(toAdjust.getDayCount());
+      adjustDate(temp, businessDayConventions[pos], calendars[pos]);
+      if(temp.compareTo(toAdjust) == 0) {
+        adjustedDates.add(toAdjust);
+      } else {
+        adjustedDates.add(temp);
+        temp = new DateWithDayCount(0);
+      }
+    }
+    return adjustedDates;
+  }
+
   public DateWithDayCount shift(DateWithDayCount date, int periodMultiplier, PeriodEnum period, DayTypeEnum dayType, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer holidayCalendarContainer) {
     if(period != PeriodEnum.D) {
       throw new PricerException("Unhandled period " + period + ", expected D");
@@ -164,7 +193,7 @@ public class SwapStreamDateCalculator {
       case BUSINESS:
         int signum = Integer.signum(periodMultiplier);
         int abs = Math.abs(periodMultiplier);
-        for (int i = 0; i < abs; i++) {
+        for(int i = 0; i < abs; i++) {
           date.addDays(signum);
           adjustDate(date, signum == -1 ? BusinessDayConventionEnum.PRECEDING : BusinessDayConventionEnum.FOLLOWING, holidayCalendarContainer);
         }

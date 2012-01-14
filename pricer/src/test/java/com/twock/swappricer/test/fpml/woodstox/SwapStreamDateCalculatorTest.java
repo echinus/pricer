@@ -37,7 +37,7 @@ public class SwapStreamDateCalculatorTest {
     fpmlParser = FpmlParserTest.createFpmlParser();
     container = new HolidayCalendarContainer();
     container.loadFromTsv(new InputStreamReader(SwapStreamDateCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
-    london = new HolidayCalendarContainer(container, Arrays.asList("GBLO"));
+    london = new HolidayCalendarContainer(container, "GBLO");
   }
 
   @Test
@@ -303,7 +303,53 @@ public class SwapStreamDateCalculatorTest {
   }
 
   @Test
+  public void calculateAdjustedFpmlPeriodDates() {
+    List<SwapStream> streams = fpmlParser.parse(getClass().getResourceAsStream("/LCH00000513426.xml"));
+    SwapStream s1 = streams.get(0);
+    SwapStream s2 = streams.get(1);
+    List<DateWithDayCount> unadjustedSide1Dates = calculator.calculateUnadjustedPeriodDates(s1.getEffectiveDate().getUnadjustedDate(), s1.getFirstRegularPeriodStartDate(), s1.getLastRegularPeriodEndDate(), s1.getTerminationDate().getUnadjustedDate(), s1.getCalculationPeriodFrequency());
+    List<DateWithDayCount> unadjustedSide2Dates = calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency());
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2008, 6, 13),
+      new DateWithDayCount(2009, 6, 13),
+      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2011, 6, 13),
+      new DateWithDayCount(2012, 6, 13),
+      new DateWithDayCount(2013, 6, 13),
+      new DateWithDayCount(2014, 6, 13),
+      new DateWithDayCount(2015, 6, 13),
+      new DateWithDayCount(2016, 6, 13),
+      new DateWithDayCount(2017, 6, 13),
+      new DateWithDayCount(2018, 6, 13)
+    ), unadjustedSide1Dates);
+    Assert.assertEquals(Arrays.asList(
+      new DateWithDayCount(2008, 6, 13),
+      new DateWithDayCount(2008, 12, 13),
+      new DateWithDayCount(2009, 6, 13),
+      new DateWithDayCount(2009, 12, 13),
+      new DateWithDayCount(2010, 6, 13),
+      new DateWithDayCount(2010, 12, 13),
+      new DateWithDayCount(2011, 6, 13),
+      new DateWithDayCount(2011, 12, 13),
+      new DateWithDayCount(2012, 6, 13),
+      new DateWithDayCount(2012, 12, 13),
+      new DateWithDayCount(2013, 6, 13),
+      new DateWithDayCount(2013, 12, 13),
+      new DateWithDayCount(2014, 6, 13),
+      new DateWithDayCount(2014, 12, 13),
+      new DateWithDayCount(2015, 6, 13),
+      new DateWithDayCount(2015, 12, 13),
+      new DateWithDayCount(2016, 6, 13),
+      new DateWithDayCount(2016, 12, 13),
+      new DateWithDayCount(2017, 6, 13),
+      new DateWithDayCount(2017, 12, 13),
+      new DateWithDayCount(2018, 6, 13)
+    ), unadjustedSide2Dates);
+  }
+
+  @Test
   public void shiftNoBusinessDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.NO_ADJUST, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.FOLLOWING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.PRECEDING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODFOLLOWING, london));
@@ -312,6 +358,7 @@ public class SwapStreamDateCalculatorTest {
 
   @Test
   public void shiftNoCalendarDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.NO_ADJUST, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.FOLLOWING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.PRECEDING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 0, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODFOLLOWING, london));
@@ -320,17 +367,37 @@ public class SwapStreamDateCalculatorTest {
 
   @Test
   public void shiftPositiveBusinessDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.NO_ADJUST, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODPRECEDING, london));
   }
 
   @Test
   public void shiftPositiveCalendarDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 14), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.NO_ADJUST, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 13), 1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODPRECEDING, london));
   }
 
   @Test
   public void shiftNegativeBusinessDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.NO_ADJUST, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.BUSINESS, BusinessDayConventionEnum.MODPRECEDING, london));
   }
 
   @Test
   public void shiftNegativeCalendarDay() {
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 15), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.NO_ADJUST, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.FOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.PRECEDING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODFOLLOWING, london));
+    Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODPRECEDING, london));
   }
 }

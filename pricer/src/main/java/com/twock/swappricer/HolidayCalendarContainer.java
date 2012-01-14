@@ -16,12 +16,17 @@ public class HolidayCalendarContainer {
   public HolidayCalendarContainer() {
   }
 
-  public HolidayCalendarContainer(HolidayCalendarContainer cals, Collection<String> codes) {
-    TreeMap<String, HolidayCalendar> calendars = new TreeMap<String, HolidayCalendar>();
-    for(String code : codes) {
-      calendars.put(code, cals.getHolidayCalendars().get(code));
+  public HolidayCalendarContainer(HolidayCalendarContainer cals, String... codes) {
+    if(cals.holidayCalendars != null) {
+      TreeMap<String, HolidayCalendar> calendars = new TreeMap<String, HolidayCalendar>();
+      for(String code : codes) {
+        HolidayCalendar calendar = cals.getHolidayCalendars().get(code);
+        if(calendar != null) {
+          calendars.put(code, calendar);
+        }
+      }
+      holidayCalendars = calendars;
     }
-    holidayCalendars = calendars;
   }
 
   public void loadFromTsv(Reader input) {
