@@ -1,4 +1,4 @@
-package com.twock.swappricer.test.fpml;
+package com.twock.swappricer.test.fpml.model;
 
 import com.twock.swappricer.fpml.model.DateWithDayCount;
 import com.twock.swappricer.fpml.model.enumeration.RollConventionEnum;
