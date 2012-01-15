@@ -371,6 +371,27 @@ public class SwapStreamDateCalculator {
         case ACT_360:
           result[i] = (double)(endDate.getDayCount() - startDate.getDayCount()) / 360;
           break;
+        case THIRTY_360:
+          result[i] = (double)(360 * (endDate.getYear() - startDate.getYear())
+            + 30 * (endDate.getMonthOfYear() - startDate.getMonthOfYear())
+            + (endDate.getDayOfMonth() == 31 && startDate.getDayOfMonth() > 29 ? 30 : endDate.getDayOfMonth())
+            - Math.min(startDate.getDayOfMonth(), 30))
+            / 360.0;
+          break;
+        case THIRTY_E_360:
+          result[i] = (double)(360 * (endDate.getYear() - startDate.getYear())
+            + 30 * (endDate.getMonthOfYear() - startDate.getMonthOfYear())
+            + Math.min(endDate.getDayOfMonth(), 30)
+            - Math.min(startDate.getDayOfMonth(), 30))
+            / 360.0;
+          break;
+        case THIRTY_E_360_ISDA:
+          result[i] = (double)(360 * (endDate.getYear() - startDate.getYear())
+            + 30 * (endDate.getMonthOfYear() - startDate.getMonthOfYear())
+            + (endDate.getDayOfMonth() == 31 || (i != last && endDate.getMonthOfYear() == 2 && DateUtil.dateToDayCount(new short[]{endDate.getYear(), 3, 1}) - 1 == endDate.getDayCount()) ? 30 : endDate.getDayOfMonth())
+            - (startDate.getDayOfMonth() == 31 || (startDate.getMonthOfYear() == 2 && DateUtil.dateToDayCount(new short[]{startDate.getYear(), 3, 1}) - 1 == startDate.getDayCount()) ? 30 : startDate.getDayOfMonth()))
+            / 360.0;
+          break;
         default:
           throw new PricerException("Unhandled day count fraction " + dayCountFraction);
       }

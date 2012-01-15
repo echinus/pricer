@@ -525,10 +525,90 @@ public class SwapStreamDateCalculatorTest {
     Assert.assertArrayEquals(new double[]{695.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2010, 6, 15), new DateWithDayCount(2012, 5, 10)), ACT_360, null, false, false), DCF_DELTA);
   }
 
-  /*
-  THIRTY_360("30/360"),
-  THIRTY_E_360("30E/360"),
-  THIRTY_E_360_ISDA("30E/360.ISDA"),
-*/
+  @Test
+  public void testDayCountThirty360() {
+    // examples from http://www.isda.org/c_and_a/docs/30-360-2006ISDADefs.xls
+    Assert.assertArrayEquals(new double[]{15.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 30)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 2, 15)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 7, 15)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 3, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2007, 10, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{360.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 9, 30)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{16.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{33.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2006, 8, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{183.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 8, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{14.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 14), new DateWithDayCount(2007, 2, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{363.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 26), new DateWithDayCount(2008, 2, 29)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{359.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2009, 2, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{31.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 30)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{32.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{7.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 5)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 10, 31), new DateWithDayCount(2007, 11, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{179.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 8, 31), new DateWithDayCount(2008, 2, 29)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{182.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 8, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 8, 31), new DateWithDayCount(2009, 2, 28)), THIRTY_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{183.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2009, 2, 28), new DateWithDayCount(2009, 8, 31)), THIRTY_360, null, false, false), DCF_DELTA);
+  }
 
+  @Test
+  public void testDayCountThirtyE360() {
+    // examples from http://www.isda.org/c_and_a/docs/30-360-2006ISDADefs.xls
+    Assert.assertArrayEquals(new double[]{15.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 30)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 2, 15)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 7, 15)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 3, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2007, 10, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{360.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 9, 30)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{15.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{32.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2006, 8, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{182.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 8, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{14.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 14), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{363.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 26), new DateWithDayCount(2008, 2, 29)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{359.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2009, 2, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{31.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 30)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{31.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{7.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 5)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 10, 31), new DateWithDayCount(2007, 11, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{179.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 8, 31), new DateWithDayCount(2008, 2, 29)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{181.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 8, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 8, 31), new DateWithDayCount(2009, 2, 28)), THIRTY_E_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{182.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2009, 2, 28), new DateWithDayCount(2009, 8, 31)), THIRTY_E_360, null, false, false), DCF_DELTA);
+  }
+
+  @Test
+  public void testDayCountThirtyE360Isda() {
+    // examples from http://www.isda.org/c_and_a/docs/30-360-2006ISDADefs.xls
+    // had to be modified to match termination date of 28/02/2009
+    Assert.assertArrayEquals(new double[]{15.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 30)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 2, 15)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 7, 15)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 3, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2007, 10, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{360.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 9, 30), new DateWithDayCount(2008, 9, 30)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{15.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 15), new DateWithDayCount(2007, 1, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360, 2.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 31), new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 2)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 1, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360, 2.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2006, 8, 31), new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 2)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2006, 8, 31), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 8, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{16.0 / 360, 2.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 14), new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 2)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{14.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 14), new DateWithDayCount(2007, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{364.0 / 360, 2.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 26), new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 2)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{363.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 26), new DateWithDayCount(2008, 2, 29)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{358.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2009, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 30)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{30.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{5.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 2, 28), new DateWithDayCount(2007, 3, 5)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{28.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 10, 31), new DateWithDayCount(2007, 11, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360, 2.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 8, 31), new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 3, 2)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{179.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2007, 8, 31), new DateWithDayCount(2008, 2, 29)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 2, 29), new DateWithDayCount(2008, 8, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 8, 31), new DateWithDayCount(2009, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2009, 2, 28), new DateWithDayCount(2009, 8, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
+  }
 }
