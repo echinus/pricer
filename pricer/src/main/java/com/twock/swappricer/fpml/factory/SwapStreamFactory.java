@@ -7,6 +7,7 @@ import com.twock.swappricer.PricerException;
 import com.twock.swappricer.fpml.FpmlParser;
 import com.twock.swappricer.fpml.model.*;
 import com.twock.swappricer.fpml.model.enumeration.CompoundingMethodEnum;
+import com.twock.swappricer.fpml.model.enumeration.DayCountFractionEnum;
 import com.twock.swappricer.fpml.model.enumeration.PeriodEnum;
 import org.codehaus.stax2.XMLStreamReader2;
 
@@ -39,7 +40,7 @@ public class SwapStreamFactory {
     ResetDates resetDates = null;
     Double notionalAmount = null;
     String notionalCurrency = null;
-    String dayCountFraction = null;
+    DayCountFractionEnum dayCountFraction = null;
     CompoundingMethodEnum compoundingMethod = null;
     Double fixedRate = null;
     String floatingRateIndex = null;
@@ -74,7 +75,7 @@ public class SwapStreamFactory {
             notionalAmount = (Double)notionalParts[0];
             notionalCurrency = (String)notionalParts[1];
           } else if("dayCountFraction".equals(localName)) {
-            dayCountFraction = FpmlParser.readText(streamReader);
+            dayCountFraction = DayCountFractionEnum.fromValue(FpmlParser.readText(streamReader));
           } else if("compoundingMethod".equals(localName)) {
             compoundingMethod = CompoundingMethodEnum.fromValue(FpmlParser.readText(streamReader));
           } else if("fixedRateSchedule".equals(localName)) {

@@ -1,6 +1,7 @@
 package com.twock.swappricer.fpml.model;
 
 import com.twock.swappricer.fpml.model.enumeration.CompoundingMethodEnum;
+import com.twock.swappricer.fpml.model.enumeration.DayCountFractionEnum;
 import com.twock.swappricer.fpml.model.enumeration.PeriodEnum;
 
 /**
@@ -17,7 +18,7 @@ public class SwapStream {
   private final ResetDates resetDates;
   private final Double notionalAmount;
   private final String notionalCurrency;
-  private final String dayCountFraction;
+  private final DayCountFractionEnum dayCountFraction;
   private final CompoundingMethodEnum compoundingMethod;
   // fixed sides only:
   private final Double fixedRate;
@@ -28,7 +29,7 @@ public class SwapStream {
   private final Double spread;
   private final Double initialRate;
 
-  public SwapStream(AdjustableDate effectiveDate, AdjustableDate terminationDate, BusinessDayAdjustments calculationPeriodDatesAdjustments, CalculationPeriodFrequency calculationPeriodFrequency, DateWithDayCount firstRegularPeriodStartDate, DateWithDayCount lastRegularPeriodEndDate, PaymentDates paymentDates, ResetDates resetDates, Double notionalAmount, String notionalCurrency, String dayCountFraction, CompoundingMethodEnum compoundingMethod, Double fixedRate, String floatingRateIndex, Integer indexTenorPeriodMultiplier, PeriodEnum indexTenorPeriod, Double spread, Double initialRate) {
+  public SwapStream(AdjustableDate effectiveDate, AdjustableDate terminationDate, BusinessDayAdjustments calculationPeriodDatesAdjustments, CalculationPeriodFrequency calculationPeriodFrequency, DateWithDayCount firstRegularPeriodStartDate, DateWithDayCount lastRegularPeriodEndDate, PaymentDates paymentDates, ResetDates resetDates, Double notionalAmount, String notionalCurrency, DayCountFractionEnum dayCountFraction, CompoundingMethodEnum compoundingMethod, Double fixedRate, String floatingRateIndex, Integer indexTenorPeriodMultiplier, PeriodEnum indexTenorPeriod, Double spread, Double initialRate) {
     this.effectiveDate = effectiveDate;
     this.terminationDate = terminationDate;
     this.calculationPeriodDatesAdjustments = calculationPeriodDatesAdjustments;
@@ -93,7 +94,7 @@ public class SwapStream {
     return fixedRate;
   }
 
-  public String getDayCountFraction() {
+  public DayCountFractionEnum getDayCountFraction() {
     return dayCountFraction;
   }
 
