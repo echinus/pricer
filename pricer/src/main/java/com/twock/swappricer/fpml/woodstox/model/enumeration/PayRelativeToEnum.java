@@ -32,17 +32,18 @@ public enum PayRelativeToEnum {
   /**
    * Payments will occur relative to the last Pricing Date of each Calculation Period.
    */
-  LAST_PRICING_DATE("LastPricingDate"),
+//  LAST_PRICING_DATE("LastPricingDate"),
 
   /**
    * Payments will occur relative to the reset date.
    */
-  RESET_DATE("ResetDate"),
+//  RESET_DATE("ResetDate"),
 
   /**
    * Payments will occur relative to the valuation date.
    */
-  VALUATION_DATE("ValuationDate");
+//  VALUATION_DATE("ValuationDate")
+  ;
   private final String value;
 
   PayRelativeToEnum(String v) {

@@ -11,14 +11,14 @@ import java.util.Set;
  */
 public enum RollConventionEnum {
   EOM("EOM"),
-  FRN("FRN"),
+  //  FRN("FRN"),
   IMM("IMM"),
-  IMMCAD("IMMCAD"),
-  IMMAUD("IMMAUD"),
-  IMMNZD("IMMNZD"),
-  SFE("SFE"),
+  //  IMMCAD("IMMCAD"),
+//  IMMAUD("IMMAUD"),
+//  IMMNZD("IMMNZD"),
+//  SFE("SFE"),
   NONE("NONE"),
-  TBILL("TBILL"),
+  //  TBILL("TBILL"),
   DAY1("1"),
   DAY2("2"),
   DAY3("3"),
@@ -49,13 +49,14 @@ public enum RollConventionEnum {
   DAY28("28"),
   DAY29("29"),
   DAY30("30"),
-  MON("MON"),
-  TUE("TUE"),
-  WED("WED"),
-  THU("THU"),
-  FRI("FRI"),
-  SAT("SAT"),
-  SUN("SUN");
+//  MON("MON"),
+//  TUE("TUE"),
+//  WED("WED"),
+//  THU("THU"),
+//  FRI("FRI"),
+//  SAT("SAT"),
+//  SUN("SUN");
+  ;
   private final String value;
   public static final Set<RollConventionEnum> DAY_ROLLS = Collections.unmodifiableSet(EnumSet.range(DAY1, DAY30));
 

@@ -30,7 +30,7 @@ public enum BusinessDayConventionEnum {
   /**
    * Per 2000 ISDA Definitions, Section 4.11. FRN Convention; Eurodollar Convention.
    */
-  FRN_ADJUST("FRN"),
+//  FRN_ADJUST("FRN"),
 
   /**
    * The non-business date will be adjusted to the first following day that is a business day unless that day falls in the next calendar month, in which case that date will be the first preceding day that is a business day.
@@ -60,7 +60,8 @@ public enum BusinessDayConventionEnum {
   /**
    * The date adjustments conventions are defined elsewhere, so it is not required to specify them here.
    */
-  NOT_APPLICABLE("NotApplicable");
+//  NOT_APPLICABLE("NotApplicable");
+  ;
   private final String value;
 
   BusinessDayConventionEnum(String v) {

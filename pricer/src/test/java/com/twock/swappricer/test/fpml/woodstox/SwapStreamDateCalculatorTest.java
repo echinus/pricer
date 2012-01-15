@@ -9,12 +9,8 @@ import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.PricerException;
 import com.twock.swappricer.fpml.woodstox.FpmlParser;
 import com.twock.swappricer.fpml.woodstox.SwapStreamDateCalculator;
-import com.twock.swappricer.fpml.woodstox.model.CalculationPeriodFrequency;
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
-import com.twock.swappricer.fpml.woodstox.model.SwapStream;
-import com.twock.swappricer.fpml.woodstox.model.enumeration.BusinessDayConventionEnum;
-import com.twock.swappricer.fpml.woodstox.model.enumeration.DayTypeEnum;
-import com.twock.swappricer.fpml.woodstox.model.enumeration.PeriodEnum;
+import com.twock.swappricer.fpml.woodstox.model.*;
+import com.twock.swappricer.fpml.woodstox.model.enumeration.*;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -108,12 +104,6 @@ public class SwapStreamDateCalculatorTest {
     Assert.assertTrue(calculator.matchesRollConvention(FEB28_2011, DAY29));
     Assert.assertTrue(calculator.matchesRollConvention(FEB28_2011, DAY30));
     Assert.assertTrue(calculator.matchesRollConvention(FEB28_2011, EOM));
-  }
-
-  @Test(expected = PricerException.class)
-  public void errorsOnFrn() {
-    DateWithDayCount FEB29_2012 = new DateWithDayCount(2012, 2, 29);
-    calculator.matchesRollConvention(FEB29_2012, FRN);
   }
 
   @Test
@@ -441,5 +431,44 @@ public class SwapStreamDateCalculatorTest {
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.PRECEDING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 16), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODFOLLOWING, london));
     Assert.assertEquals(new DateWithDayCount(2012, 1, 13), calculator.shift(new DateWithDayCount(2012, 1, 16), -1, PeriodEnum.D, DayTypeEnum.CALENDAR, BusinessDayConventionEnum.MODPRECEDING, london));
+  }
+
+  @Test
+  public void noInitialStub() {
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 15), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 18), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY18));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 31), new DateWithDayCount(2012, 2, 29), new CalculationPeriodFrequency(1, PeriodEnum.M, EOM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 30), new DateWithDayCount(2012, 2, 29), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY30));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 2, 29), new DateWithDayCount(2012, 3, 30), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY30));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 2, 29), new DateWithDayCount(2012, 3, 30), new CalculationPeriodFrequency(1, PeriodEnum.M, EOM));
+  }
+
+  @Test
+  public void initialStub() {
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 17), new DateWithDayCount(2012, 2, 15), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 19), new DateWithDayCount(2012, 2, 15), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 14), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 16), new CalculationPeriodFrequency(1, PeriodEnum.M, IMM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 17), new DateWithDayCount(2012, 2, 18), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY18));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 19), new DateWithDayCount(2012, 2, 18), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY18));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 17), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY18));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 19), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY18));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 30), new DateWithDayCount(2012, 2, 29), new CalculationPeriodFrequency(1, PeriodEnum.M, EOM));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 2, 29), new DateWithDayCount(2012, 3, 31), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY30));
+    calculator.hasInitialStub(new DateWithDayCount(2012, 1, 18), new DateWithDayCount(2012, 2, 18), new CalculationPeriodFrequency(1, PeriodEnum.M, DAY1));
+  }
+
+  @Test
+  public void noStubPaymentDates() {
+    PaymentDates ONEMONTH_MODFOL = new PaymentDates(1, PeriodEnum.M, PayRelativeToEnum.CALCULATION_PERIOD_END_DATE, null, new BusinessDayAdjustments(BusinessDayConventionEnum.MODFOLLOWING, "GBLO"));
+    PaymentDates ONEMONTH_MODFOL_UPFRONT = new PaymentDates(1, PeriodEnum.M, PayRelativeToEnum.CALCULATION_PERIOD_START_DATE, null, new BusinessDayAdjustments(BusinessDayConventionEnum.MODFOLLOWING, "GBLO"));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2012, 2, 1)),
+      calculator.calculatePaymentDates(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1)), ONEMONTH_MODFOL, allCalendars));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2012, 1, 3)),
+      calculator.calculatePaymentDates(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1)), ONEMONTH_MODFOL_UPFRONT, allCalendars));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2012, 2, 1), new DateWithDayCount(2012, 3, 1), new DateWithDayCount(2012, 4, 2)),
+      calculator.calculatePaymentDates(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1), new DateWithDayCount(2012, 3, 1), new DateWithDayCount(2012, 4, 1)), ONEMONTH_MODFOL, allCalendars));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2012, 1, 3), new DateWithDayCount(2012, 2, 1), new DateWithDayCount(2012, 3, 1)),
+      calculator.calculatePaymentDates(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1), new DateWithDayCount(2012, 3, 1), new DateWithDayCount(2012, 4, 1)), ONEMONTH_MODFOL_UPFRONT, allCalendars));
   }
 }

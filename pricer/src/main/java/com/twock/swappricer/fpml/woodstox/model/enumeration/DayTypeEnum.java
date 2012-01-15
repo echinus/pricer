@@ -33,22 +33,23 @@ public enum DayTypeEnum {
   /**
    * When calculating the number of days between two dates the count includes only commodity business days.
    */
-  COMMODITY_BUSINESS("CommodityBusiness"),
+//  COMMODITY_BUSINESS("CommodityBusiness"),
 
   /**
    * When calculating the number of days between two dates the count includes only currency business days.
    */
-  CURRENCY_BUSINESS("CurrencyBusiness"),
+//  CURRENCY_BUSINESS("CurrencyBusiness"),
 
   /**
    * When calculating the number of days between two dates the count includes only stock exchange business days.
    */
-  EXCHANGE_BUSINESS("ExchangeBusiness"),
+//  EXCHANGE_BUSINESS("ExchangeBusiness"),
 
   /**
    * When calculating the number of days between two dates the count includes only scheduled trading days.
    */
-  SCHEDULED_TRADING_DAY("ScheduledTradingDay");
+//  SCHEDULED_TRADING_DAY("ScheduledTradingDay")
+  ;
   private final String value;
 
   DayTypeEnum(String v) {

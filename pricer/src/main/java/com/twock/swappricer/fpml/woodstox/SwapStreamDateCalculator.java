@@ -14,14 +14,30 @@ import com.twock.swappricer.fpml.woodstox.model.enumeration.*;
  * @author Chris Pearson (chris@twock.com)
  */
 public class SwapStreamDateCalculator {
-  public boolean hasInitialStub(SwapStream swapStream) {
-    DateWithDayCount effectiveDate = swapStream.getEffectiveDate().getUnadjustedDate();
-    if(!matchesRollConvention(effectiveDate, swapStream.getCalculationPeriodFrequency().getRollConvention())) {
+  /**
+   * Work out from the period dates whether the first period is a stub or not.
+   *
+   * @param date1 unadjusted period start date
+   * @param date2 unadjusted period end date
+   * @param calculationPeriodFrequency swap stream's period frequency
+   * @return true if there is an initial stub, false otherwise
+   */
+  public boolean hasInitialStub(DateWithDayCount date1, DateWithDayCount date2, CalculationPeriodFrequency calculationPeriodFrequency) {
+    if(!matchesRollConvention(date1, calculationPeriodFrequency.getRollConvention())) {
       return true;
     }
-    return false;
+    DateWithDayCount dateCopy = new DateWithDayCount(date1);
+    addPeriod(dateCopy, calculationPeriodFrequency);
+    return date2.compareTo(dateCopy) == 0;
   }
 
+  /**
+   * Find whether the given date complies with the supplied roll convention.
+   *
+   * @param date the date to check
+   * @param rollConvention the roll convention to check the date against
+   * @return true if the date matches the roll convention
+   */
   public boolean matchesRollConvention(DateWithDayCount date, RollConventionEnum rollConvention) {
     switch(rollConvention) {
       case EOM:
@@ -116,6 +132,17 @@ public class SwapStreamDateCalculator {
     return date;
   }
 
+  /**
+   * Given the necessary information to calculate the schedule of unadjusted period dates, calculate them and return as
+   * a list.
+   *
+   * @param effectiveDate swap stream effective date
+   * @param firstRegularPeriodStartDate beginning of the first regular period if specified in the FpML, null otherwise
+   * @param lastRegularPeriodEndDate end of the last regular period if specified in the FpML, null otherwise
+   * @param terminationDate swap stream end date
+   * @param calculationPeriodFrequency period frequency and roll convention
+   * @return the unadjusted period dates in order
+   */
   public List<DateWithDayCount> calculateUnadjustedPeriodDates(DateWithDayCount effectiveDate, DateWithDayCount firstRegularPeriodStartDate, DateWithDayCount lastRegularPeriodEndDate, DateWithDayCount terminationDate, CalculationPeriodFrequency calculationPeriodFrequency) {
     List<DateWithDayCount> result = new ArrayList<DateWithDayCount>();
     result.add(effectiveDate);
@@ -130,20 +157,7 @@ public class SwapStreamDateCalculator {
 
       DateWithDayCount current = new DateWithDayCount(start);
       while(current.compareTo(end) < 0) {
-        switch(calculationPeriodFrequency.getPeriod()) {
-          case D:
-            current.addDays(calculationPeriodFrequency.getPeriodMultiplier());
-            break;
-          case W:
-            current.addDays(7 * calculationPeriodFrequency.getPeriodMultiplier());
-            break;
-          case M:
-            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
-            break;
-          case Y:
-            current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12, calculationPeriodFrequency.getRollConvention());
-            break;
-        }
+        addPeriod(current, calculationPeriodFrequency);
         if(current.compareTo(end) < 0) {
           result.add(new DateWithDayCount(current));
         }
@@ -157,12 +171,43 @@ public class SwapStreamDateCalculator {
     return result;
   }
 
+  /**
+   * Take a given date and modify it by adding the given calculation period to it, and applying the roll convention.
+   *
+   * @param current the date to modify
+   * @param calculationPeriodFrequency the calculation period frequency to add to the date
+   */
+  private static void addPeriod(DateWithDayCount current, CalculationPeriodFrequency calculationPeriodFrequency) {
+    switch(calculationPeriodFrequency.getPeriod()) {
+      case D:
+        current.addDays(calculationPeriodFrequency.getPeriodMultiplier());
+        break;
+      case W:
+        current.addDays(7 * calculationPeriodFrequency.getPeriodMultiplier());
+        break;
+      case M:
+        current.addMonths(calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
+        break;
+      case Y:
+        current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12, calculationPeriodFrequency.getRollConvention());
+        break;
+    }
+  }
+
+  /**
+   * When given a list of unadjusted period dates, and the necessary business day adjustments and holiday calendars,
+   * calculate and return the list of adjusted calculation period dates.  Where possible tries to use the same date
+   * objects in the returned list, so beware side effects when altering dates in the returned list.  Will leave dates
+   * in unadjustedDates unmodified.
+   *
+   * @param unadjustedDates the pre-calculated list of unadjusted period dates
+   * @param effectiveDateAdjustments adjustments to apply to the first date only
+   * @param normalAdjustments adjustments to apply to every date except first and last
+   * @param terminationDateAdjustments adjustments to apply to the last date only
+   * @param allCalendars all holiday calendars in existence, appropriate calendars will be extracted
+   * @return the adjusted period dates, the list will be the same length as the unadjustedDates parameter
+   */
   public List<DateWithDayCount> calculateAdjustedPeriodDates(List<DateWithDayCount> unadjustedDates, BusinessDayAdjustments effectiveDateAdjustments, BusinessDayAdjustments normalAdjustments, BusinessDayAdjustments terminationDateAdjustments, HolidayCalendarContainer allCalendars) {
-    BusinessDayConventionEnum businessDayConventions[] = {
-      effectiveDateAdjustments.getBusinessDayConvention(),
-      normalAdjustments.getBusinessDayConvention(),
-      terminationDateAdjustments.getBusinessDayConvention()
-    };
     HolidayCalendarContainer[] calendars = {
       new HolidayCalendarContainer(allCalendars, effectiveDateAdjustments.getBusinessCenters()),
       new HolidayCalendarContainer(allCalendars, normalAdjustments.getBusinessCenters()),
@@ -171,10 +216,11 @@ public class SwapStreamDateCalculator {
     List<DateWithDayCount> adjustedDates = new ArrayList<DateWithDayCount>(unadjustedDates.size());
     DateWithDayCount temp = new DateWithDayCount(0);
     for(int index = 0, last = unadjustedDates.size() - 1; index <= last; index++) {
-      int pos = index == 0 ? 0 : (index == last ? 2 : 1);
       DateWithDayCount toAdjust = unadjustedDates.get(index);
       temp.setDayCount(toAdjust.getDayCount());
-      adjustDate(temp, businessDayConventions[pos], calendars[pos]);
+      adjustDate(temp,
+        index == 0 ? effectiveDateAdjustments.getBusinessDayConvention() : (index == last ? terminationDateAdjustments.getBusinessDayConvention() : normalAdjustments.getBusinessDayConvention()),
+        calendars[index == 0 ? 0 : (index == last ? 2 : 1)]);
       if(temp.compareTo(toAdjust) == 0) {
         adjustedDates.add(toAdjust);
       } else {
@@ -185,6 +231,18 @@ public class SwapStreamDateCalculator {
     return adjustedDates;
   }
 
+  /**
+   * Take a date and shift it according to the parameters.  Used for fixing lags, payment lags, etc.  This method
+   * modifies the provided date, and does not create a new DateWithDayCount object.
+   *
+   * @param date the date to adjust, this will be modified by the message
+   * @param periodMultiplier number of periods to shift by, can be negative
+   * @param period period type, the only acceptable period is days
+   * @param dayType type applied to days
+   * @param businessDayConvention business day convention to apply
+   * @param holidayCalendarContainer all holiday calendars, relevant ones will be extracted for use
+   * @return for convenience, returns the modified date paramter for method chaining
+   */
   public DateWithDayCount shift(DateWithDayCount date, int periodMultiplier, PeriodEnum period, DayTypeEnum dayType, BusinessDayConventionEnum businessDayConvention, HolidayCalendarContainer holidayCalendarContainer) {
     if(period != PeriodEnum.D) {
       throw new PricerException("Unhandled period " + period + ", expected D");
@@ -206,5 +264,37 @@ public class SwapStreamDateCalculator {
         throw new PricerException("Unhandled dayType " + dayType + ", expected BUSINESS or CALENDAR");
     }
     return date;
+  }
+
+  /**
+   * When given a list of unadjusted period dates and the necessary paymentDates schedule, will calculate the payment
+   * dates to accompany each calculation period.  Where possible this method will the date instances from the supplied
+   * unadjustedDates parameter rather than creating new ones.
+   *
+   * @param unadjustedDates pre-calculated unadjusted period dates
+   * @param paymentDates rules for payment date calculation
+   * @param allCalendars all holiday calendars, relevant ones will be extracted for use
+   * @return a list of payment dates, one per period - so length will be one less than the number of unadjustedDates
+   */
+  public List<DateWithDayCount> calculatePaymentDates(List<DateWithDayCount> unadjustedDates, PaymentDates paymentDates, HolidayCalendarContainer allCalendars) {
+    // todo compounded payment dates
+    // calculate unadjusted dates for payment schedule from effective/first regular payment/last regular payment/termination
+    // to match up to period need to know multiplier, i.e. 1m period 1y payment = 12x periods per payment
+    HolidayCalendarContainer paymentCalendars = new HolidayCalendarContainer(allCalendars, paymentDates.getPaymentDatesAdjustments().getBusinessCenters());
+    List<DateWithDayCount> result = new ArrayList<DateWithDayCount>(unadjustedDates.size() - 1);
+    boolean payInArrears = paymentDates.getPayRelativeTo() == PayRelativeToEnum.CALCULATION_PERIOD_END_DATE;
+    DateWithDayCount temp = new DateWithDayCount(0);
+    for(int i = payInArrears ? 1 : 0, last = unadjustedDates.size() - (payInArrears ? 1 : 2); i <= last; i++) {
+      DateWithDayCount unadjusted = unadjustedDates.get(i);
+      temp.setDayCount(unadjusted.getDayCount());
+      adjustDate(temp, paymentDates.getPaymentDatesAdjustments().getBusinessDayConvention(), paymentCalendars);
+      if(temp.compareTo(unadjusted) == 0) {
+        result.add(unadjusted);
+      } else {
+        result.add(temp);
+        temp = new DateWithDayCount(0);
+      }
+    }
+    return result;
   }
 }
