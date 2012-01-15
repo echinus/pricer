@@ -1,8 +1,6 @@
 package com.twock.swappricer.fpml;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 import com.twock.swappricer.DateUtil;
 import com.twock.swappricer.HolidayCalendarContainer;
@@ -14,6 +12,9 @@ import com.twock.swappricer.fpml.model.enumeration.*;
  * @author Chris Pearson (chris@twock.com)
  */
 public class SwapStreamDateCalculator {
+
+  private static final EnumSet<PeriodEnum> MONTH_OR_YEAR = EnumSet.of(PeriodEnum.M, PeriodEnum.Y);
+
   /**
    * Work out from the period dates whether the first period is a stub or not.
    *
@@ -27,7 +28,7 @@ public class SwapStreamDateCalculator {
       return true;
     }
     DateWithDayCount dateCopy = new DateWithDayCount(date1);
-    addPeriod(dateCopy, calculationPeriodFrequency);
+    addPeriod(dateCopy, calculationPeriodFrequency.getPeriod(), calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
     return date2.compareTo(dateCopy) == 0;
   }
 
@@ -157,7 +158,7 @@ public class SwapStreamDateCalculator {
 
       DateWithDayCount current = new DateWithDayCount(start);
       while(current.compareTo(end) < 0) {
-        addPeriod(current, calculationPeriodFrequency);
+        addPeriod(current, calculationPeriodFrequency.getPeriod(), calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
         if(current.compareTo(end) < 0) {
           result.add(new DateWithDayCount(current));
         }
@@ -175,21 +176,23 @@ public class SwapStreamDateCalculator {
    * Take a given date and modify it by adding the given calculation period to it, and applying the roll convention.
    *
    * @param current the date to modify
-   * @param calculationPeriodFrequency the calculation period frequency to add to the date
+   * @param period unit of periods
+   * @param periodMultiplier number of units per period
+   * @param rollConvention roll convention for monthly/yearly rolls
    */
-  private static void addPeriod(DateWithDayCount current, CalculationPeriodFrequency calculationPeriodFrequency) {
-    switch(calculationPeriodFrequency.getPeriod()) {
+  private static void addPeriod(DateWithDayCount current, PeriodEnum period, Integer periodMultiplier, RollConventionEnum rollConvention) {
+    switch(period) {
       case D:
-        current.addDays(calculationPeriodFrequency.getPeriodMultiplier());
+        current.addDays(periodMultiplier);
         break;
       case W:
-        current.addDays(7 * calculationPeriodFrequency.getPeriodMultiplier());
+        current.addDays(7 * periodMultiplier);
         break;
       case M:
-        current.addMonths(calculationPeriodFrequency.getPeriodMultiplier(), calculationPeriodFrequency.getRollConvention());
+        current.addMonths(periodMultiplier, rollConvention);
         break;
       case Y:
-        current.addMonths(calculationPeriodFrequency.getPeriodMultiplier() * 12, calculationPeriodFrequency.getRollConvention());
+        current.addMonths(periodMultiplier * 12, rollConvention);
         break;
     }
   }
@@ -304,11 +307,14 @@ public class SwapStreamDateCalculator {
    *
    * @param adjustedDates a list of period dates
    * @param dayCountFraction the day count fraction to use for calculation
+   * @param regularCalculationPeriod frequency information for regular calculation periods
+   * @param hasInitialStub whether the initial period is irregular
+   * @param hasFinalStub whether the final period is irregular
    * @return number of days in each period, so array will be one smaller than adjustedDates parameter
    */
-  public double[] getDayCountFractions(List<DateWithDayCount> adjustedDates, DayCountFractionEnum dayCountFraction, CalculationPeriodFrequency regularCalculationPeriod) {
+  public double[] getDayCountFractions(List<DateWithDayCount> adjustedDates, DayCountFractionEnum dayCountFraction, CalculationPeriodFrequency regularCalculationPeriod, boolean hasInitialStub, boolean hasFinalStub) {
     double[] result = new double[adjustedDates.size() - 1];
-    for(int i = 0; i < adjustedDates.size() - 1; i++) {
+    for(int i = 0, last = adjustedDates.size() - 2; i <= last; i++) {
       DateWithDayCount startDate = adjustedDates.get(i);
       DateWithDayCount endDate = adjustedDates.get(i + 1);
       switch(dayCountFraction) {
@@ -324,6 +330,36 @@ public class SwapStreamDateCalculator {
             result[i] = (double)(DateUtil.dateToDayCount(new short[]{(short)(startYear + 1), 1, 1}) - startDate.getDayCount()) / DateUtil.daysInYear(startYear)
               + endYear - startYear - 1
               + (double)(endDate.getDayCount() - DateUtil.dateToDayCount(new short[]{endYear, 1, 1})) / DateUtil.daysInYear(endYear);
+          }
+          break;
+        case ACT_ACT_ICMA:
+          if(regularCalculationPeriod == null) {
+            throw new PricerException("Regular calculation period required for " + DayCountFractionEnum.ACT_ACT_ICMA.value());
+          } else if(!MONTH_OR_YEAR.contains(regularCalculationPeriod.getPeriod())) {
+            throw new PricerException("Can only handle yearly or monthly regular calculation periods for " + DayCountFractionEnum.ACT_ACT_ICMA.value());
+          }
+          double periodsPerYear = 12.0 / (regularCalculationPeriod.getPeriod() == PeriodEnum.Y ? 12 * regularCalculationPeriod.getPeriodMultiplier() : regularCalculationPeriod.getPeriodMultiplier());
+          result[i] = 0;
+          if(hasInitialStub && i == 0) {
+            DateWithDayCount tempEndDate = new DateWithDayCount(endDate);
+            DateWithDayCount tempStartDate = new DateWithDayCount(0);
+            while(tempEndDate.compareTo(startDate) > 0) {
+              tempStartDate.setDayCount(tempEndDate.getDayCount());
+              addPeriod(tempStartDate, regularCalculationPeriod.getPeriod(), -regularCalculationPeriod.getPeriodMultiplier(), regularCalculationPeriod.getRollConvention());
+              result[i] += (double)(tempEndDate.getDayCount() - Math.max(tempStartDate.getDayCount(), startDate.getDayCount())) / (periodsPerYear * (tempEndDate.getDayCount() - tempStartDate.getDayCount()));
+              tempEndDate.setDayCount(tempStartDate.getDayCount());
+            }
+          } else if(hasFinalStub && i == last) {
+            DateWithDayCount tempStartDate = new DateWithDayCount(startDate);
+            DateWithDayCount tempEndDate = new DateWithDayCount(0);
+            while(tempStartDate.compareTo(endDate) < 0) {
+              tempEndDate.setDayCount(tempStartDate.getDayCount());
+              addPeriod(tempEndDate, regularCalculationPeriod.getPeriod(), regularCalculationPeriod.getPeriodMultiplier(), regularCalculationPeriod.getRollConvention());
+              result[i] += (double)(Math.min(tempEndDate.getDayCount(), endDate.getDayCount()) - tempStartDate.getDayCount()) / (periodsPerYear * (tempEndDate.getDayCount() - tempStartDate.getDayCount()));
+              tempStartDate.setDayCount(tempEndDate.getDayCount());
+            }
+          } else {
+            result[i] = 1.0 / periodsPerYear;
           }
           break;
         default:
