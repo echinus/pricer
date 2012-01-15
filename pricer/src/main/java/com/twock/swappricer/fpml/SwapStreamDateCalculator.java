@@ -365,6 +365,12 @@ public class SwapStreamDateCalculator {
             result[i] = 1.0 / periodsPerYear;
           }
           break;
+        case ACT_365_FIXED:
+          result[i] = (double)(endDate.getDayCount() - startDate.getDayCount()) / 365;
+          break;
+        case ACT_360:
+          result[i] = (double)(endDate.getDayCount() - startDate.getDayCount()) / 360;
+          break;
         default:
           throw new PricerException("Unhandled day count fraction " + dayCountFraction);
       }

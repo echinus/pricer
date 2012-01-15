@@ -511,13 +511,21 @@ public class SwapStreamDateCalculatorTest {
     }
   }
 
+  @Test
+  public void testDayCountAct365Fixed() {
+    Assert.assertArrayEquals(new double[]{31.0 / 365}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1)), ACT_365_FIXED, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{48.0 / 365}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2011, 12, 15), new DateWithDayCount(2012, 2, 1)), ACT_365_FIXED, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{695.0 / 365}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2010, 6, 15), new DateWithDayCount(2012, 5, 10)), ACT_365_FIXED, null, false, false), DCF_DELTA);
+  }
+
+  @Test
+  public void testDayCountAct360() {
+    Assert.assertArrayEquals(new double[]{31.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1)), ACT_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{48.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2011, 12, 15), new DateWithDayCount(2012, 2, 1)), ACT_360, null, false, false), DCF_DELTA);
+    Assert.assertArrayEquals(new double[]{695.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2010, 6, 15), new DateWithDayCount(2012, 5, 10)), ACT_360, null, false, false), DCF_DELTA);
+  }
+
   /*
-  SINGLE("1/1"),
-  ACT_ACT_ISDA("ACT/ACT.ISDA"),
-  ACT_ACT_ICMA("ACT/ACT.ICMA"),
-  ACT_ACT_ISMA("ACT/ACT.ISMA"),
-  ACT_365_FIXED("ACT/365.FIXED"),
-  ACT_360("ACT/360"),
   THIRTY_360("30/360"),
   THIRTY_E_360("30E/360"),
   THIRTY_E_360_ISDA("30E/360.ISDA"),
