@@ -3,7 +3,7 @@ package com.twock.swappricer;
 import java.util.Arrays;
 import java.util.List;
 
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
+import com.twock.swappricer.fpml.model.DateWithDayCount;
 
 /**
  * @author Chris Pearson (chris@twock.com)

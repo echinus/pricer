@@ -4,7 +4,7 @@ import java.io.Reader;
 import java.util.*;
 
 import au.com.bytecode.opencsv.CSVReader;
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
+import com.twock.swappricer.fpml.model.DateWithDayCount;
 import org.apache.commons.io.IOUtils;
 
 /**

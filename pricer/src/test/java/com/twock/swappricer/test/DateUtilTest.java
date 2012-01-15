@@ -3,7 +3,7 @@ package com.twock.swappricer.test;
 import java.util.Calendar;
 
 import com.twock.swappricer.DateUtil;
-import com.twock.swappricer.fpml.woodstox.model.DateWithDayCount;
+import com.twock.swappricer.fpml.model.DateWithDayCount;
 import org.junit.Assert;
 import org.junit.Test;
 
