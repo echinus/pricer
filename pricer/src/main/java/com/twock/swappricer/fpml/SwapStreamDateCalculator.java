@@ -313,6 +313,13 @@ public class SwapStreamDateCalculator {
    * @return number of days in each period, so array will be one smaller than adjustedDates parameter
    */
   public double[] getDayCountFractions(List<DateWithDayCount> adjustedDates, DayCountFractionEnum dayCountFraction, CalculationPeriodFrequency regularCalculationPeriod, boolean hasInitialStub, boolean hasFinalStub) {
+    if(dayCountFraction == DayCountFractionEnum.ACT_ACT_ICMA || dayCountFraction == DayCountFractionEnum.ACT_ACT_ISMA) {
+      if(regularCalculationPeriod == null) {
+        throw new PricerException("Regular calculation period required for " + dayCountFraction.value());
+      } else if(!MONTH_OR_YEAR.contains(regularCalculationPeriod.getPeriod())) {
+        throw new PricerException("Can only handle yearly or monthly regular calculation periods for " + dayCountFraction.value());
+      }
+    }
     double[] result = new double[adjustedDates.size() - 1];
     for(int i = 0, last = adjustedDates.size() - 2; i <= last; i++) {
       DateWithDayCount startDate = adjustedDates.get(i);
@@ -333,11 +340,7 @@ public class SwapStreamDateCalculator {
           }
           break;
         case ACT_ACT_ICMA:
-          if(regularCalculationPeriod == null) {
-            throw new PricerException("Regular calculation period required for " + DayCountFractionEnum.ACT_ACT_ICMA.value());
-          } else if(!MONTH_OR_YEAR.contains(regularCalculationPeriod.getPeriod())) {
-            throw new PricerException("Can only handle yearly or monthly regular calculation periods for " + DayCountFractionEnum.ACT_ACT_ICMA.value());
-          }
+        case ACT_ACT_ISMA:
           double periodsPerYear = 12.0 / (regularCalculationPeriod.getPeriod() == PeriodEnum.Y ? 12 * regularCalculationPeriod.getPeriodMultiplier() : regularCalculationPeriod.getPeriodMultiplier());
           result[i] = 0;
           if(hasInitialStub && i == 0) {

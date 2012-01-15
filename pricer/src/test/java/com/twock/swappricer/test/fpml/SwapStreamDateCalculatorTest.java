@@ -473,18 +473,6 @@ public class SwapStreamDateCalculatorTest {
       calculator.calculatePaymentDates(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1), new DateWithDayCount(2012, 3, 1), new DateWithDayCount(2012, 4, 1)), ONEMONTH_MODFOL_UPFRONT, allCalendars));
   }
 
-/*
-  SINGLE("1/1"),
-  ACT_ACT_ISDA("ACT/ACT.ISDA"),
-  ACT_ACT_ICMA("ACT/ACT.ICMA"),
-  ACT_ACT_ISMA("ACT/ACT.ISMA"),
-  ACT_365_FIXED("ACT/365.FIXED"),
-  ACT_360("ACT/360"),
-  THIRTY_360("30/360"),
-  THIRTY_E_360("30E/360"),
-  THIRTY_E_360_ISDA("30E/360.ISDA"),
-*/
-
   @Test
   public void testDayCountSingle() {
     Assert.assertArrayEquals(new double[]{1}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2012, 1, 1), new DateWithDayCount(2012, 2, 1)), SINGLE, null, false, false), DCF_DELTA);
@@ -510,13 +498,29 @@ public class SwapStreamDateCalculatorTest {
   }
 
   @Test
-  public void testDayCountActActIcma() {
-    // examples from http://www.isda.org/c_and_a/pdf/ACT-ACT-ISDA-1999.pdf
-    Assert.assertArrayEquals(new double[]{0.5}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2003, 11, 1), new DateWithDayCount(2004, 5, 1)), ACT_ACT_ICMA, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY1), false, false), DCF_DELTA);
-    Assert.assertArrayEquals(new double[]{150.0 / 365, 1}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 2, 1), new DateWithDayCount(1999, 7, 1), new DateWithDayCount(2000, 7, 1)), ACT_ACT_ICMA, new CalculationPeriodFrequency(1, PeriodEnum.Y, DAY1), true, false), DCF_DELTA);
-    Assert.assertArrayEquals(new double[]{0.5 + 153.0 / (184 * 2), 0.5}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2002, 8, 15), new DateWithDayCount(2003, 7, 15), new DateWithDayCount(2004, 1, 15)), ACT_ACT_ICMA, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY15), true, false), DCF_DELTA);
-    Assert.assertArrayEquals(new double[]{0.5, 152.0 / (182 * 2)}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 7, 30), new DateWithDayCount(2000, 1, 30), new DateWithDayCount(2000, 6, 30)), ACT_ACT_ICMA, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY30), false, true), DCF_DELTA);
-    Assert.assertArrayEquals(new double[]{0.25 + 61.0 / (92 * 4)}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 11, 30), new DateWithDayCount(2000, 4, 30)), ACT_ACT_ICMA, new CalculationPeriodFrequency(3, PeriodEnum.M, EOM), false, true), DCF_DELTA);
+  public void testDayCountActActIcmaIsma() {
+    // ICMA and ISMA are identical: http://www.isda.org/c_and_a/trading_practice.html
+    EnumSet<DayCountFractionEnum> identical = EnumSet.of(ACT_ACT_ISMA, ACT_ACT_ICMA);
+    for(DayCountFractionEnum dcf : identical) {
+      // examples from http://www.isda.org/c_and_a/pdf/ACT-ACT-ISDA-1999.pdf
+      Assert.assertArrayEquals(new double[]{0.5}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2003, 11, 1), new DateWithDayCount(2004, 5, 1)), dcf, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY1), false, false), DCF_DELTA);
+      Assert.assertArrayEquals(new double[]{150.0 / 365, 1}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 2, 1), new DateWithDayCount(1999, 7, 1), new DateWithDayCount(2000, 7, 1)), dcf, new CalculationPeriodFrequency(1, PeriodEnum.Y, DAY1), true, false), DCF_DELTA);
+      Assert.assertArrayEquals(new double[]{0.5 + 153.0 / (184 * 2), 0.5}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2002, 8, 15), new DateWithDayCount(2003, 7, 15), new DateWithDayCount(2004, 1, 15)), dcf, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY15), true, false), DCF_DELTA);
+      Assert.assertArrayEquals(new double[]{0.5, 152.0 / (182 * 2)}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 7, 30), new DateWithDayCount(2000, 1, 30), new DateWithDayCount(2000, 6, 30)), dcf, new CalculationPeriodFrequency(6, PeriodEnum.M, DAY30), false, true), DCF_DELTA);
+      Assert.assertArrayEquals(new double[]{0.25 + 61.0 / (92 * 4)}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(1999, 11, 30), new DateWithDayCount(2000, 4, 30)), dcf, new CalculationPeriodFrequency(3, PeriodEnum.M, EOM), false, true), DCF_DELTA);
+    }
   }
+
+  /*
+  SINGLE("1/1"),
+  ACT_ACT_ISDA("ACT/ACT.ISDA"),
+  ACT_ACT_ICMA("ACT/ACT.ICMA"),
+  ACT_ACT_ISMA("ACT/ACT.ISMA"),
+  ACT_365_FIXED("ACT/365.FIXED"),
+  ACT_360("ACT/360"),
+  THIRTY_360("30/360"),
+  THIRTY_E_360("30E/360"),
+  THIRTY_E_360_ISDA("30E/360.ISDA"),
+*/
 
 }
