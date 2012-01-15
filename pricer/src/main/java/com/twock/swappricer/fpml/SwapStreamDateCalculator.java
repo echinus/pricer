@@ -297,4 +297,39 @@ public class SwapStreamDateCalculator {
     }
     return result;
   }
+
+  /**
+   * Given a set of dates and a day count fraction, calculate the number of days in each period for calculation
+   * purposes.
+   *
+   * @param adjustedDates a list of period dates
+   * @param dayCountFraction the day count fraction to use for calculation
+   * @return number of days in each period, so array will be one smaller than adjustedDates parameter
+   */
+  public double[] getDayCountFractions(List<DateWithDayCount> adjustedDates, DayCountFractionEnum dayCountFraction, CalculationPeriodFrequency regularCalculationPeriod) {
+    double[] result = new double[adjustedDates.size() - 1];
+    for(int i = 0; i < adjustedDates.size() - 1; i++) {
+      DateWithDayCount startDate = adjustedDates.get(i);
+      DateWithDayCount endDate = adjustedDates.get(i + 1);
+      switch(dayCountFraction) {
+        case SINGLE:
+          result[i] = 1;
+          break;
+        case ACT_ACT_ISDA:
+          short startYear = startDate.getYear();
+          short endYear = endDate.getYear();
+          if(startYear == endYear) {
+            result[i] = (double)(endDate.getDayCount() - startDate.getDayCount()) / DateUtil.daysInYear(startYear);
+          } else {
+            result[i] = (double)(DateUtil.dateToDayCount(new short[]{(short)(startYear + 1), 1, 1}) - startDate.getDayCount()) / DateUtil.daysInYear(startYear)
+              + endYear - startYear - 1
+              + (double)(endDate.getDayCount() - DateUtil.dateToDayCount(new short[]{endYear, 1, 1})) / DateUtil.daysInYear(endYear);
+          }
+          break;
+        default:
+          throw new PricerException("Unhandled day count fraction " + dayCountFraction);
+      }
+    }
+    return result;
+  }
 }

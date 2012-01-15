@@ -35,4 +35,14 @@ public class DateUtil {
     int day = ddd - (mi * 306 + 5) / 10 + 1;
     return new short[]{(short)year, (short)month, (short)day};
   }
+
+  /**
+   * Find the number of days in the given year.
+   *
+   * @param year year to check
+   * @return number if days in the year
+   */
+  public static int daysInYear(int year) {
+    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) ? 366 : 365;
+  }
 }

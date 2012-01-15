@@ -2,6 +2,7 @@ package com.twock.swappricer.fpml.model.enumeration;
 
 /**
  * From <a href="http://www.fpml.org/coding-scheme/day-count-fraction-2-2.xml">http://www.fpml.org/coding-scheme/day-count-fraction-2-2.xml</a>.
+ * See also <a href="http://en.wikipedia.org/wiki/Day_count_convention">http://en.wikipedia.org/wiki/Day_count_convention</a>.
  *
  * @author Chris Pearson (chris@twock.com)
  */

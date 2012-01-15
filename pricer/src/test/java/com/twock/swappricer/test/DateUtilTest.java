@@ -41,4 +41,17 @@ public class DateUtilTest {
     Assert.assertTrue(new DateWithDayCount(2012, 1, 1).isWeekend());
     Assert.assertFalse(new DateWithDayCount(2012, 1, 2).isWeekend());
   }
+
+  @Test
+  public void testDaysInYear() {
+    Assert.assertEquals(365, DateUtil.daysInYear(1999));
+    Assert.assertEquals(366, DateUtil.daysInYear(2000));
+    Assert.assertEquals(365, DateUtil.daysInYear(2001));
+    Assert.assertEquals(366, DateUtil.daysInYear(2004));
+    Assert.assertEquals(366, DateUtil.daysInYear(2096));
+    Assert.assertEquals(365, DateUtil.daysInYear(2100));
+    Assert.assertEquals(365, DateUtil.daysInYear(2200));
+    Assert.assertEquals(365, DateUtil.daysInYear(2300));
+    Assert.assertEquals(366, DateUtil.daysInYear(2400));
+  }
 }
