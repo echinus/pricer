@@ -36,6 +36,12 @@ public class FpmlParser {
     this.xmlInputFactory = xmlInputFactory;
   }
 
+  /**
+   * Parse the FpML in the given inputStream and return the two swapStreams. Will always close the provided inputStream.
+   *
+   * @param inputStream stream from which to read the FpML, will be closed on return/exception
+   * @return a List of two SwapStreams
+   */
   public List<SwapStream> parse(InputStream inputStream) {
     XMLStreamReader2 streamReader = null;
     try {

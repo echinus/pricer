@@ -303,7 +303,7 @@ public class SwapStreamDateCalculatorTest {
       new DateWithDayCount(2016, 6, 13),
       new DateWithDayCount(2017, 6, 13),
       new DateWithDayCount(2018, 6, 13)
-    ), calculator.calculateUnadjustedPeriodDates(s1.getEffectiveDate().getUnadjustedDate(), s1.getFirstRegularPeriodStartDate(), s1.getLastRegularPeriodEndDate(), s1.getTerminationDate().getUnadjustedDate(), s1.getCalculationPeriodFrequency()));
+    ), calculator.calculateUnadjustedPeriodDates(s1));
     Assert.assertEquals(Arrays.asList(
       new DateWithDayCount(2008, 6, 13),
       new DateWithDayCount(2008, 12, 13),
@@ -326,7 +326,7 @@ public class SwapStreamDateCalculatorTest {
       new DateWithDayCount(2017, 6, 13),
       new DateWithDayCount(2017, 12, 13),
       new DateWithDayCount(2018, 6, 13)
-    ), calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency()));
+    ), calculator.calculateUnadjustedPeriodDates(s2));
   }
 
   @Test
@@ -334,8 +334,8 @@ public class SwapStreamDateCalculatorTest {
     List<SwapStream> streams = fpmlParser.parse(getClass().getResourceAsStream("/LCH00000513426.xml"));
     SwapStream s1 = streams.get(0);
     SwapStream s2 = streams.get(1);
-    List<DateWithDayCount> unadjustedSide1Dates = calculator.calculateUnadjustedPeriodDates(s1.getEffectiveDate().getUnadjustedDate(), s1.getFirstRegularPeriodStartDate(), s1.getLastRegularPeriodEndDate(), s1.getTerminationDate().getUnadjustedDate(), s1.getCalculationPeriodFrequency());
-    List<DateWithDayCount> unadjustedSide2Dates = calculator.calculateUnadjustedPeriodDates(s2.getEffectiveDate().getUnadjustedDate(), s2.getFirstRegularPeriodStartDate(), s2.getLastRegularPeriodEndDate(), s2.getTerminationDate().getUnadjustedDate(), s2.getCalculationPeriodFrequency());
+    List<DateWithDayCount> unadjustedSide1Dates = calculator.calculateUnadjustedPeriodDates(s1);
+    List<DateWithDayCount> unadjustedSide2Dates = calculator.calculateUnadjustedPeriodDates(s2);
     List<DateWithDayCount> adjustedSide1Dates = calculator.calculateAdjustedPeriodDates(unadjustedSide1Dates, s1.getEffectiveDate().getBusinessDayAdjustments(), s1.getCalculationPeriodDatesAdjustments(), s1.getTerminationDate().getBusinessDayAdjustments(), allCalendars);
     List<DateWithDayCount> adjustedSide2Dates = calculator.calculateAdjustedPeriodDates(unadjustedSide2Dates, s2.getEffectiveDate().getBusinessDayAdjustments(), s2.getCalculationPeriodDatesAdjustments(), s2.getTerminationDate().getBusinessDayAdjustments(), allCalendars);
     Assert.assertEquals(Arrays.asList(
@@ -619,4 +619,3 @@ public class SwapStreamDateCalculatorTest {
     Assert.assertEquals(Arrays.asList(new DateWithDayCount(2011, 12, 28)), calculator.calculateFixingDates(Arrays.asList(new DateWithDayCount(2011, 12, 31), new DateWithDayCount(2012, 1, 16)), new ResetDates(ResetRelativeToEnum.CALCULATION_PERIOD_START_DATE, null, new RelativeDateOffset(-2, PeriodEnum.D, DayTypeEnum.BUSINESS, new BusinessDayAdjustments(BusinessDayConventionEnum.NO_ADJUST, "GBLO")), 3, PeriodEnum.M, new BusinessDayAdjustments(MODFOLLOWING, "GBLO")), allCalendars));
   }
 }
-//  public List<DateWithDayCount> calculateFixingDates(List<DateWithDayCount> adjustedDates, ResetDates resetDates, HolidayCalendarContainer allCalendars) {
