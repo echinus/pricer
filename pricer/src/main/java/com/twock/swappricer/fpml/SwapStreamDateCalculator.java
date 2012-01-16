@@ -398,4 +398,41 @@ public class SwapStreamDateCalculator {
     }
     return result;
   }
+
+  /**
+   * When given a list of adjusted dates, and some rules to calculate fixing dates, calculate the fixing dates, one per
+   * period.
+   *
+   * @param adjustedDates adjusted calculation period dates
+   * @param resetDates rules for adjustment for reset and fixing dates
+   * @param allCalendars all holiday calendars, for extraction of reset/initialfixing/fixing calendars
+   * @return the calculated fixing dates
+   */
+  public List<DateWithDayCount> calculateFixingDates(List<DateWithDayCount> adjustedDates, ResetDates resetDates, HolidayCalendarContainer allCalendars) {
+    HolidayCalendarContainer resetCalendars = new HolidayCalendarContainer(allCalendars, resetDates.getResetDatesAdjustments().getBusinessCenters());
+    RelativeDateOffset initialFixingDate = resetDates.getInitialFixingDate();
+    RelativeDateOffset fixingDates = resetDates.getFixingDates();
+    HolidayCalendarContainer initialFixingCalendar = initialFixingDate == null ? null : new HolidayCalendarContainer(allCalendars, initialFixingDate.getBusinessDayAdjustments().getBusinessCenters());
+    HolidayCalendarContainer fixingCalendars = new HolidayCalendarContainer(allCalendars, fixingDates.getBusinessDayAdjustments().getBusinessCenters());
+    List<DateWithDayCount> result = new ArrayList<DateWithDayCount>(adjustedDates.size() - 1);
+    boolean resetInArrears = resetDates.getResetRelativeTo() == ResetRelativeToEnum.CALCULATION_PERIOD_END_DATE;
+    DateWithDayCount temp = new DateWithDayCount(0);
+    for(int first = resetInArrears ? 1 : 0, i = first, last = adjustedDates.size() - (resetInArrears ? 1 : 2); i <= last; i++) {
+      DateWithDayCount adjusted = adjustedDates.get(i);
+      temp.setDayCount(adjusted.getDayCount());
+      adjustDate(temp, resetDates.getResetDatesAdjustments().getBusinessDayConvention(), resetCalendars);
+      boolean isInitialFixing = initialFixingDate != null && i == first;
+      RelativeDateOffset offset = isInitialFixing ? initialFixingDate : fixingDates;
+      shift(temp, offset.getPeriodMultiplier(), offset.getPeriod(), offset.getDayType(), offset.getBusinessDayAdjustments().getBusinessDayConvention(), isInitialFixing ? initialFixingCalendar : fixingCalendars);
+      // todo initial fixing date
+      if(temp.compareTo(adjusted) == 0) {
+        result.add(adjusted);
+      } else {
+        result.add(temp);
+        temp = new DateWithDayCount(0);
+      }
+    }
+    return result;
+
+  }
 }

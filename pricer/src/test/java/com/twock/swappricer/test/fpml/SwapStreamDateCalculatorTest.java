@@ -611,4 +611,12 @@ public class SwapStreamDateCalculatorTest {
     Assert.assertArrayEquals(new double[]{178.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2008, 8, 31), new DateWithDayCount(2009, 2, 28)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
     Assert.assertArrayEquals(new double[]{180.0 / 360}, calculator.getDayCountFractions(Arrays.asList(new DateWithDayCount(2009, 2, 28), new DateWithDayCount(2009, 8, 31)), THIRTY_E_360_ISDA, null, false, false), DCF_DELTA);
   }
+
+  @Test
+  public void testFixingDates() {
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2012, 1, 12)), calculator.calculateFixingDates(Arrays.asList(new DateWithDayCount(2011, 12, 16), new DateWithDayCount(2012, 1, 16)), new ResetDates(ResetRelativeToEnum.CALCULATION_PERIOD_END_DATE, null, new RelativeDateOffset(-2, PeriodEnum.D, DayTypeEnum.BUSINESS, new BusinessDayAdjustments(BusinessDayConventionEnum.NO_ADJUST, "GBLO")), 3, PeriodEnum.M, new BusinessDayAdjustments(MODFOLLOWING, "GBLO")), allCalendars));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2011, 12, 14)), calculator.calculateFixingDates(Arrays.asList(new DateWithDayCount(2011, 12, 16), new DateWithDayCount(2012, 1, 16)), new ResetDates(ResetRelativeToEnum.CALCULATION_PERIOD_START_DATE, null, new RelativeDateOffset(-2, PeriodEnum.D, DayTypeEnum.BUSINESS, new BusinessDayAdjustments(BusinessDayConventionEnum.NO_ADJUST, "GBLO")), 3, PeriodEnum.M, new BusinessDayAdjustments(MODFOLLOWING, "GBLO")), allCalendars));
+    Assert.assertEquals(Arrays.asList(new DateWithDayCount(2011, 12, 28)), calculator.calculateFixingDates(Arrays.asList(new DateWithDayCount(2011, 12, 31), new DateWithDayCount(2012, 1, 16)), new ResetDates(ResetRelativeToEnum.CALCULATION_PERIOD_START_DATE, null, new RelativeDateOffset(-2, PeriodEnum.D, DayTypeEnum.BUSINESS, new BusinessDayAdjustments(BusinessDayConventionEnum.NO_ADJUST, "GBLO")), 3, PeriodEnum.M, new BusinessDayAdjustments(MODFOLLOWING, "GBLO")), allCalendars));
+  }
 }
+//  public List<DateWithDayCount> calculateFixingDates(List<DateWithDayCount> adjustedDates, ResetDates resetDates, HolidayCalendarContainer allCalendars) {
