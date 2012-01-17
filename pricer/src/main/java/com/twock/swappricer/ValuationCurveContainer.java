@@ -1,10 +1,10 @@
 package com.twock.swappricer;
 
 import java.io.Reader;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import au.com.bytecode.opencsv.CSVReader;
+import com.twock.swappricer.fpml.model.DateWithDayCount;
 import com.twock.swappricer.fpml.model.enumeration.PeriodEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
@@ -16,9 +16,11 @@ public class ValuationCurveContainer {
   private static final Logger log = Logger.getLogger(ValuationCurveContainer.class);
   private Map<String, String> discountCurveMapping;
   private Map<String, String> forwardCurveMapping;
+  private Map<String, ValuationCurve> curves;
 
-  public ValuationCurveContainer(Reader input) {
-    loadFromCsv(input);
+  public ValuationCurveContainer(Reader mappingsCsv, Reader curvesTsv) {
+    loadMappingsFromCsv(mappingsCsv);
+    loadCurvesFromTsv(curvesTsv);
   }
 
   /**
@@ -26,7 +28,7 @@ public class ValuationCurveContainer {
    *
    * @param input source of the CSV, will be closed before returning
    */
-  public void loadFromCsv(Reader input) {
+  public void loadMappingsFromCsv(Reader input) {
     Map<String, String> discountCurveMapping = new TreeMap<String, String>();
     Map<String, String> forwardCurveMapping = new TreeMap<String, String>();
     try {
@@ -53,6 +55,58 @@ public class ValuationCurveContainer {
     } finally {
       IOUtils.closeQuietly(input);
     }
+  }
+
+  /**
+   * Read a valuation curves mapping CSV from the given input stream, and close the input reader afterwards.
+   *
+   * @param input source of the CSV, will be closed before returning
+   */
+  public void loadCurvesFromTsv(Reader input) {
+    Map<String, ValuationCurve> curves = new TreeMap<String, ValuationCurve>();
+    try {
+      CSVReader reader = new CSVReader(input, '\t');
+      reader.readNext(); // dump header row
+      int rowNum = 1;
+      String[] line;
+      String currentCurve = null;
+      List<Integer> maturityDates = new ArrayList<Integer>();
+      List<Double> zeroRates = new ArrayList<Double>();
+      List<Double> discountFactors = new ArrayList<Double>();
+      DateWithDayCount closeDate = null;
+      while((line = reader.readNext()) != null) {
+        rowNum++;
+        if(line.length == 6) {
+          String curve = line[0];
+          int maturityDate = DateUtil.dateToDayCount(new short[]{Short.parseShort(line[2].substring(6, 10)), Short.parseShort(line[2].substring(3, 5)), Short.parseShort(line[2].substring(0, 2))});
+          double zeroRate = Double.parseDouble(line[4]);
+          double discountFactor = Double.parseDouble(line[5]);
+
+          if(currentCurve != null && !currentCurve.equals(curve)) {
+            curves.put(currentCurve, new ValuationCurve(currentCurve, closeDate, convertIntegers(maturityDates), convertDoubles(zeroRates), convertDoubles(discountFactors)));
+            maturityDates = new ArrayList<Integer>();
+            zeroRates = new ArrayList<Double>();
+            discountFactors = new ArrayList<Double>();
+          }
+          currentCurve = curve;
+          closeDate = new DateWithDayCount(new short[]{Short.parseShort(line[1].substring(6, 10)), Short.parseShort(line[1].substring(3, 5)), Short.parseShort(line[1].substring(0, 2))});
+          int insertPosition = -(Collections.binarySearch(maturityDates, maturityDate) + 1);
+          maturityDates.add(insertPosition, maturityDate);
+          zeroRates.add(insertPosition, zeroRate);
+          discountFactors.add(insertPosition, discountFactor);
+        } else {
+          log.debug("Ignoring zero curve TSV line " + rowNum + " of length " + line.length + " (expected 6)");
+        }
+      }
+      if(currentCurve != null) {
+        curves.put(currentCurve, new ValuationCurve(currentCurve, closeDate, convertIntegers(maturityDates), convertDoubles(zeroRates), convertDoubles(discountFactors)));
+      }
+    } catch(Exception e) {
+      throw new PricerException("Failed to read in tab separated holiday calendar file", e);
+    } finally {
+      IOUtils.closeQuietly(input);
+    }
+    this.curves = curves;
   }
 
   /**
@@ -84,7 +138,7 @@ public class ValuationCurveContainer {
   private static String getMapping(String index, Integer periodMultiplier, PeriodEnum period, String currency, Map<String, String> mappings) {
     String mapping = periodMultiplier == null || period == null ? null : mappings.get(index + ' ' + periodMultiplier + period.name());
     if(mapping == null) {
-      mapping = mappings.get(index);
+      mapping = index == null ? null : mappings.get(index);
       if(mapping == null) {
         mapping = mappings.get(currency);
         if(mapping == null) {
@@ -93,5 +147,69 @@ public class ValuationCurveContainer {
       }
     }
     return mapping;
+  }
+
+  /**
+   * When given a curve name and a date, obtain the discount factor by linearly interpolating between tenors.
+   *
+   * @param curveName mapped curve name
+   * @param dayCount numeric date from DateUtil
+   * @return the discount factor for the given date from the given curve
+   */
+  public double getDiscountFactor(String curveName, int dayCount) {
+    ValuationCurve valuationCurve = curves.get(curveName);
+    if(valuationCurve == null) {
+      throw new PricerException("No such curve " + curveName + ", available curves are " + curves.keySet());
+    }
+    int[] maturityDates = valuationCurve.getMaturityDates();
+    int position = Arrays.binarySearch(maturityDates, dayCount);
+    if(position >= 0) {
+      if(position == 0) {
+        throw new PricerException("Extrapolation earlier than first date " + Arrays.toString(DateUtil.dayCountToDate(maturityDates[0])) + " not currently supported for curve " + curveName + " and date " + Arrays.toString(DateUtil.dayCountToDate(dayCount)));
+      } else if(position == maturityDates.length) {
+        throw new PricerException("Extrapolation not currently supported for curve " + curveName + " and date " + Arrays.toString(DateUtil.dayCountToDate(dayCount)));
+      }
+      return valuationCurve.getDiscountFactors()[position];
+    } else {
+      position = -(position + 1);
+      if(position == 0) {
+        throw new PricerException("Extrapolation earlier than first date " + Arrays.toString(DateUtil.dayCountToDate(maturityDates[0])) + " not currently supported for curve " + curveName + " and date " + Arrays.toString(DateUtil.dayCountToDate(dayCount)));
+      } else if(position == maturityDates.length) {
+        throw new PricerException("Extrapolation not currently supported for curve " + curveName + " and date " + Arrays.toString(DateUtil.dayCountToDate(dayCount)));
+      }
+      int earlierDate = maturityDates[position - 1];
+      int laterDate = maturityDates[position];
+      double[] zeroRates = valuationCurve.getZeroRates();
+      double earlierRate = zeroRates[position - 1];
+      double laterRate = zeroRates[position];
+      // df = EXP(zero rate * -(flow date – valuation date)/365)
+      // R = R1 + (D – D1)*(R2 – R1)/(D2 – D1)
+      // R = interpolated zero rate
+      // R1= zero rate for closest curve pillar with earlier date
+      // R2 = zero rate for closest curve pillar with later date
+      // D = value date for forward flow
+      // D1 = value date for closest curve pillar with earlier date
+      // D2 = value date for closest curve pillar with later date
+      double interpolatedZeroRate = earlierRate + (dayCount - earlierDate) * (laterRate - earlierRate) / (laterDate - earlierDate);
+      return Math.exp(interpolatedZeroRate * -(dayCount - valuationCurve.getCurveDate().getDayCount()) / 365.0);
+    }
+  }
+
+  private static int[] convertIntegers(List<Integer> integers) {
+    int[] ret = new int[integers.size()];
+    Iterator<Integer> iterator = integers.iterator();
+    for(int i = 0; i < ret.length; i++) {
+      ret[i] = iterator.next();
+    }
+    return ret;
+  }
+
+  private static double[] convertDoubles(List<Double> doubles) {
+    double[] ret = new double[doubles.size()];
+    Iterator<Double> iterator = doubles.iterator();
+    for(int i = 0; i < ret.length; i++) {
+      ret[i] = iterator.next();
+    }
+    return ret;
   }
 }

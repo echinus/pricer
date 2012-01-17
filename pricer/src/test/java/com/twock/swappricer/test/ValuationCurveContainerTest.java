@@ -2,6 +2,7 @@ package com.twock.swappricer.test;
 
 import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 
 import com.twock.swappricer.MissingMappingException;
 import com.twock.swappricer.ValuationCurveContainer;
@@ -18,7 +19,9 @@ public class ValuationCurveContainerTest {
 
   @BeforeClass
   public static void loadCurves() {
-    container = new ValuationCurveContainer(new InputStreamReader(new BufferedInputStream(ValuationCurveContainerTest.class.getResourceAsStream("/static/valuationCurves.csv"))));
+    Reader mappingsCsv = new InputStreamReader(new BufferedInputStream(ValuationCurveContainerTest.class.getResourceAsStream("/static/valuationCurves.csv")));
+    Reader curveTsv = new InputStreamReader(new BufferedInputStream(ValuationCurveContainerTest.class.getResourceAsStream("/DMPAUC_EUR00100a - VM Yield Curve - Zero Rates Day 1.TXT")));
+    container = new ValuationCurveContainer(mappingsCsv, curveTsv);
   }
 
   @Test
@@ -47,6 +50,12 @@ public class ValuationCurveContainerTest {
     Assert.assertEquals("EUR_EURIBOR_EOD", container.getForwardCurve("xxx", 1, PeriodEnum.Y, "EUR"));
     Assert.assertEquals("EUR_EONIA_EOD", container.getDiscountCurve("xxx", 1, null, "EUR"));
     Assert.assertEquals("EUR_EURIBOR_EOD", container.getForwardCurve("xxx", 1, null, "EUR"));
+  }
+
+  @Test
+  public void noIndexButMappedCurrency() {
+    Assert.assertEquals("EUR_EONIA_EOD", container.getDiscountCurve(null, null, null, "EUR"));
+    Assert.assertEquals("EUR_EURIBOR_EOD", container.getForwardCurve(null, null, null, "EUR"));
   }
 
   @Test(expected = MissingMappingException.class)

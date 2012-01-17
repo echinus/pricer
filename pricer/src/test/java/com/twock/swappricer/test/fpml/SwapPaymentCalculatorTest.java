@@ -1,10 +1,10 @@
 package com.twock.swappricer.test.fpml;
 
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.List;
 
 import com.twock.swappricer.HolidayCalendarContainer;
+import com.twock.swappricer.ValuationCurveContainer;
 import com.twock.swappricer.fpml.FpmlParser;
 import com.twock.swappricer.fpml.SwapPaymentCalculator;
 import com.twock.swappricer.fpml.SwapStreamDateCalculator;
@@ -27,8 +27,11 @@ public class SwapPaymentCalculatorTest {
     FpmlParser fpmlParser = FpmlParserTest.createFpmlParser();
     streams = fpmlParser.parse(FpmlParserTest.class.getResourceAsStream("/LCH00000513426.xml"));
     allCalendars = new HolidayCalendarContainer();
-    allCalendars.loadFromTsv(new InputStreamReader(SwapStreamDateCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
-    swapPaymentCalculator = new SwapPaymentCalculator();
+    allCalendars.loadFromTsv(new InputStreamReader(SwapPaymentCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
+    Reader mappingsCsv = new InputStreamReader(new BufferedInputStream(SwapPaymentCalculatorTest.class.getResourceAsStream("/static/valuationCurves.csv")));
+    Reader curveTsv = new InputStreamReader(new BufferedInputStream(SwapPaymentCalculatorTest.class.getResourceAsStream("/DMPAUC_EUR00100a - VM Yield Curve - Zero Rates Day 1.TXT")));
+    ValuationCurveContainer valuationCurveContainer = new ValuationCurveContainer(mappingsCsv, curveTsv);
+    swapPaymentCalculator = new SwapPaymentCalculator(valuationCurveContainer);
     swapStreamDateCalculator = new SwapStreamDateCalculator();
   }
 
@@ -38,6 +41,6 @@ public class SwapPaymentCalculatorTest {
     List<DateWithDayCount> periodDates = swapStreamDateCalculator.calculateAdjustedPeriodDates(fixedStream, allCalendars);
     List<DateWithDayCount> paymentDates = swapStreamDateCalculator.calculatePaymentDates(periodDates, fixedStream.getPaymentDates(), allCalendars);
     double[] dayCountFractions = swapStreamDateCalculator.getDayCountFractions(periodDates, fixedStream.getDayCountFraction(), fixedStream.getCalculationPeriodFrequency(), null, null);
-    swapPaymentCalculator.valueFixedSide(fixedStream.getNotionalAmount(), fixedStream.getFixedRate(), dayCountFractions, paymentDates);
+    swapPaymentCalculator.valueFixedSide(fixedStream.getNotionalAmount(), fixedStream.getFixedRate(), dayCountFractions, paymentDates, fixedStream.getNotionalCurrency());
   }
 }
