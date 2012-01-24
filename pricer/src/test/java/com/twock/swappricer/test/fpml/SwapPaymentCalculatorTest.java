@@ -45,7 +45,7 @@ public class SwapPaymentCalculatorTest {
     List<DateWithDayCount> periodDates = swapStreamDateCalculator.calculateAdjustedPeriodDates(fixedStream, allCalendars);
     List<DateWithDayCount> paymentDates = swapStreamDateCalculator.calculatePaymentDates(periodDates, fixedStream.getPaymentDates(), allCalendars);
     double[] dayCountFractions = swapStreamDateCalculator.getDayCountFractions(periodDates, fixedStream.getDayCountFraction(), fixedStream.getCalculationPeriodFrequency(), null, null);
-    swapPaymentCalculator.valueFixedSide(fixedStream.getNotionalAmount(), fixedStream.getFixedRate(), dayCountFractions, paymentDates, fixedStream.getNotionalCurrency());
+    Assert.assertEquals(167468.93, swapPaymentCalculator.valueFixedSide(fixedStream.getNotionalAmount(), fixedStream.getFixedRate(), dayCountFractions, paymentDates, fixedStream.getNotionalCurrency()), 0.01);
   }
 
   @Test
