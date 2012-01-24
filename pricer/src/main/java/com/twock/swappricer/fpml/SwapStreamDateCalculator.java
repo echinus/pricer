@@ -436,8 +436,8 @@ public class SwapStreamDateCalculator {
     HolidayCalendarContainer resetCalendars = new HolidayCalendarContainer(allCalendars, resetDates.getResetDatesAdjustments().getBusinessCenters());
     RelativeDateOffset initialFixingDate = resetDates.getInitialFixingDate();
     RelativeDateOffset fixingDates = resetDates.getFixingDates();
-    HolidayCalendarContainer initialFixingCalendar = initialFixingDate == null ? null : new HolidayCalendarContainer(allCalendars, initialFixingDate.getBusinessDayAdjustments().getBusinessCenters());
-    HolidayCalendarContainer fixingCalendars = new HolidayCalendarContainer(allCalendars, fixingDates.getBusinessDayAdjustments().getBusinessCenters());
+    HolidayCalendarContainer initialFixingCalendar = initialFixingDate == null ? null : new HolidayCalendarContainer(allCalendars, initialFixingDate.getBusinessCenters());
+    HolidayCalendarContainer fixingCalendars = new HolidayCalendarContainer(allCalendars, fixingDates.getBusinessCenters());
     List<DateWithDayCount> result = new ArrayList<DateWithDayCount>(adjustedDates.size() - 1);
     boolean resetInArrears = resetDates.getResetRelativeTo() == ResetRelativeToEnum.CALCULATION_PERIOD_END_DATE;
     DateWithDayCount temp = new DateWithDayCount(0);
@@ -447,7 +447,7 @@ public class SwapStreamDateCalculator {
       adjustDate(temp, resetDates.getResetDatesAdjustments().getBusinessDayConvention(), resetCalendars);
       boolean isInitialFixing = initialFixingDate != null && i == first;
       RelativeDateOffset offset = isInitialFixing ? initialFixingDate : fixingDates;
-      shift(temp, offset.getPeriodMultiplier(), offset.getPeriod(), offset.getDayType(), offset.getBusinessDayAdjustments().getBusinessDayConvention(), isInitialFixing ? initialFixingCalendar : fixingCalendars);
+      shift(temp, offset.getPeriodMultiplier(), offset.getPeriod(), offset.getDayType(), offset.getBusinessDayConvention(), isInitialFixing ? initialFixingCalendar : fixingCalendars);
       // todo initial fixing date
       if(temp.compareTo(adjusted) == 0) {
         result.add(adjusted);

@@ -58,4 +58,9 @@ public class FpmlParserTest {
     Assert.assertArrayEquals(new String[]{"EUTA"}, streams.get(0).getPaymentDates().getPaymentDatesAdjustments().getBusinessCenters());
     Assert.assertArrayEquals(new String[]{"EUTA"}, streams.get(1).getPaymentDates().getPaymentDatesAdjustments().getBusinessCenters());
   }
+
+  @Test
+  public void fixingBusinessCenters() {
+    Assert.assertArrayEquals(new String[]{"EUTA"}, streams.get(1).getResetDates().getFixingDates().getBusinessCenters());
+  }
 }
