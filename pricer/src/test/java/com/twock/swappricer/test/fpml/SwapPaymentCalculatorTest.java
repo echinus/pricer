@@ -4,15 +4,15 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import com.twock.swappricer.CurveContainer;
 import com.twock.swappricer.HolidayCalendarContainer;
 import com.twock.swappricer.ValuationCurve;
-import com.twock.swappricer.ValuationCurveContainer;
 import com.twock.swappricer.fpml.FpmlParser;
 import com.twock.swappricer.fpml.SwapPaymentCalculator;
 import com.twock.swappricer.fpml.SwapStreamDateCalculator;
 import com.twock.swappricer.fpml.model.DateWithDayCount;
 import com.twock.swappricer.fpml.model.SwapStream;
-import com.twock.swappricer.test.ValuationCurveContainerTest;
+import com.twock.swappricer.test.CurveContainerTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -26,7 +26,7 @@ public class SwapPaymentCalculatorTest {
   private static List<SwapStream> streams;
   private static SwapPaymentCalculator swapPaymentCalculator;
   private static SwapStreamDateCalculator swapStreamDateCalculator;
-  private static ValuationCurveContainer valuationCurveContainer;
+  private static CurveContainer curveContainer;
 
   @BeforeClass
   public static void setUp() throws UnsupportedEncodingException {
@@ -34,8 +34,8 @@ public class SwapPaymentCalculatorTest {
     streams = fpmlParser.parse(FpmlParserTest.class.getResourceAsStream("/LCH00000513426.xml"));
     allCalendars = new HolidayCalendarContainer();
     allCalendars.loadFromTsv(new InputStreamReader(SwapPaymentCalculatorTest.class.getResourceAsStream("/calendars.tsv"), "UTF8"));
-    valuationCurveContainer = ValuationCurveContainerTest.getValuationCurveContainer();
-    swapPaymentCalculator = new SwapPaymentCalculator(valuationCurveContainer);
+    curveContainer = CurveContainerTest.getCurveContainer();
+    swapPaymentCalculator = new SwapPaymentCalculator(curveContainer);
     swapStreamDateCalculator = new SwapStreamDateCalculator();
   }
 
@@ -54,8 +54,8 @@ public class SwapPaymentCalculatorTest {
     List<DateWithDayCount> periodDates = swapStreamDateCalculator.calculateAdjustedPeriodDates(fixedStream, allCalendars);
     List<DateWithDayCount> paymentDates = swapStreamDateCalculator.calculatePaymentDates(periodDates, fixedStream.getPaymentDates(), allCalendars);
     double[] dayCountFractions = swapStreamDateCalculator.getDayCountFractions(periodDates, fixedStream.getDayCountFraction(), fixedStream.getCalculationPeriodFrequency(), null, null);
-    String discountCurve = valuationCurveContainer.getDiscountCurve(null, null, null, fixedStream.getNotionalCurrency());
-    ValuationCurve curve = valuationCurveContainer.getCurve(discountCurve);
+    String discountCurve = curveContainer.getDiscountCurve(null, null, null, fixedStream.getNotionalCurrency());
+    ValuationCurve curve = curveContainer.getCurve(discountCurve);
 
     double[] fixedPaymentAmounts = swapPaymentCalculator.calculateFixedPaymentAmounts(fixedStream.getNotionalAmount(), fixedStream.getFixedRate(), dayCountFractions, 0, dayCountFractions.length);
     double[] expectedLastAmounts = {25000, 25000, 25000, 25138.89, 24861.11, 25000, 25000};

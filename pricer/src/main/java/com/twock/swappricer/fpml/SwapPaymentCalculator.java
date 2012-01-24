@@ -3,23 +3,23 @@ package com.twock.swappricer.fpml;
 import java.util.Collections;
 import java.util.List;
 
+import com.twock.swappricer.CurveContainer;
 import com.twock.swappricer.ValuationCurve;
-import com.twock.swappricer.ValuationCurveContainer;
 import com.twock.swappricer.fpml.model.DateWithDayCount;
 
 /**
  * @author Chris Pearson (chris@twock.com)
  */
 public class SwapPaymentCalculator {
-  private final ValuationCurveContainer valuationCurveContainer;
+  private final CurveContainer curveContainer;
 
-  public SwapPaymentCalculator(ValuationCurveContainer valuationCurveContainer) {
-    this.valuationCurveContainer = valuationCurveContainer;
+  public SwapPaymentCalculator(CurveContainer curveContainer) {
+    this.curveContainer = curveContainer;
   }
 
   public double valueFixedSide(double notional, double fixedRate, double[] dayCount, List<DateWithDayCount> paymentDates, String currency) {
-    String discountCurve = valuationCurveContainer.getDiscountCurve(null, null, null, currency);
-    ValuationCurve curve = valuationCurveContainer.getCurve(discountCurve);
+    String discountCurve = curveContainer.getDiscountCurve(null, null, null, currency);
+    ValuationCurve curve = curveContainer.getCurve(discountCurve);
     double[] fixedPaymentAmounts = calculateFixedPaymentAmounts(notional, fixedRate, dayCount, 0, dayCount.length);
     double[] fixedDiscountedAmounts = calculateDiscountedPaymentAmounts(fixedPaymentAmounts, paymentDates, curve);
     double result = 0;
