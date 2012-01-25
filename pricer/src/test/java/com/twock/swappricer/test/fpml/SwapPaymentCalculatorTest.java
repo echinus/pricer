@@ -3,6 +3,7 @@ package com.twock.swappricer.test.fpml;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.SortedMap;
 
 import com.twock.swappricer.CurveContainer;
 import com.twock.swappricer.HolidayCalendarContainer;
@@ -68,5 +69,26 @@ public class SwapPaymentCalculatorTest {
     for(int i = 0; i < expectedDiscountedAmounts.length; i++) {
       Assert.assertEquals(expectedDiscountedAmounts[i], fixedDiscountedAmounts[fixedDiscountedAmounts.length - expectedDiscountedAmounts.length + i], 0.01);
     }
+  }
+
+  @Test
+  public void testFloatingSideIndexRates() {
+    SwapStream floatingStream = streams.get(1);
+    List<DateWithDayCount> periodDates = swapStreamDateCalculator.calculateAdjustedPeriodDates(floatingStream, allCalendars);
+    List<DateWithDayCount> paymentDates = swapStreamDateCalculator.calculatePaymentDates(periodDates, floatingStream.getPaymentDates(), allCalendars);
+    List<DateWithDayCount> resetDates = swapStreamDateCalculator.calculateFixingDates(periodDates, floatingStream.getResetDates(), allCalendars);
+    SortedMap<Integer, Double> historicIndexRates = curveContainer.getHistoricIndexRates(floatingStream.getFloatingRateIndex(), floatingStream.getIndexTenorPeriodMultiplier(), floatingStream.getIndexTenorPeriod());
+    // todo figure out currency cut off lag for PV, and don't bother calculating fixings for periods that pay before that date
+    // todo today's date is the cut off
+    // todo get historic rates for any periods that pay > valuation date and have available historic fixings
+    double[] fixings = new double[resetDates.size()];
+    for(int i = 0; i < fixings.length; i++) {
+      Double fixing = historicIndexRates.get(resetDates.get(i).getDayCount());
+      if(fixing == null) {
+        break;
+      }
+      fixings[i] = fixing;
+    }
+    // todo estimate forward rates for any periods
   }
 }
